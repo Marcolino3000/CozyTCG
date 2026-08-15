@@ -1137,8 +1137,12 @@ namespace CozyTGC
         // -------------------------------------------------------------------
         void OnGUI()
         {
+            UiSkin.Ensure();
+
+            // The labels over the table keep the plain white face on purpose: they sit
+            // on the wood, not on a panel, and the skin's ink is meant for parchment.
             labelStyle ??= new GUIStyle(GUI.skin.label) { alignment = TextAnchor.MiddleCenter, fontSize = 12 };
-            titleStyle ??= new GUIStyle(GUI.skin.label) { fontStyle = FontStyle.Bold };
+            titleStyle = UiSkin.Title;
 
             DrawSlotLabels();
             DrawHeldLabel();
@@ -1148,18 +1152,20 @@ namespace CozyTGC
             // No album buttons here: the shelf of books down the left is the menu,
             // and it stays on screen when the HUD is hidden - as do the shop's own
             // tab in the opposite corner and the dialog button under it.
-            GUILayout.BeginArea(new Rect(12, 12, 320, 232), GUI.skin.box);
+            GUILayout.BeginArea(new Rect(UiSkin.Px(12f), UiSkin.Px(12f), UiSkin.Px(320f), UiSkin.Px(240f)),
+                                UiSkin.Panel);
             GUILayout.Label("Cozy TGC - Pack Opening", titleStyle);
-            GUILayout.Label(Hint());
-            GUILayout.Space(4);
+            GUILayout.Label(Hint(), UiSkin.Detail);
+            GUILayout.Space(UiSkin.Px(4f));
             // No coins here: the purse is on screen in the top right whatever this panel
             // is doing, and two live copies of one number is one too many.
-            GUILayout.Label($"Packs: {packs}   Pack #{packsOpened}");
+            GUILayout.Label($"Packs: {packs}   Pack #{packsOpened}", UiSkin.Label);
             GUILayout.Label($"In pack: {(deck != null ? deck.Remaining : 0)}" +
-                            $"   Sorted: {(board != null ? board.TotalCards : 0)}");
-            GUILayout.Label(AlbumLine());
-            if (lastCard.IsValid) GUILayout.Label($"Last card: {catalog.FullNameOf(lastCard)}");
-            GUILayout.Label("Space / R: pack   Q: unpack it all   B: shop\nC: clear slots   H: hide");
+                            $"   Sorted: {(board != null ? board.TotalCards : 0)}", UiSkin.Label);
+            GUILayout.Label(AlbumLine(), UiSkin.Label);
+            if (lastCard.IsValid) GUILayout.Label($"Last card: {catalog.FullNameOf(lastCard)}", UiSkin.Label);
+            GUILayout.Label("Space / R: pack   Q: unpack it all   B: shop\nC: clear slots   H: hide",
+                            UiSkin.Detail);
             GUILayout.EndArea();
 
             DrawTearMeter();
@@ -1206,10 +1212,22 @@ namespace CozyTGC
             Vector3 screen = cam.WorldToScreenPoint(world);
             if (screen.z <= 0f) return;
 
-            float width = 120f;
-            var rect = new Rect(screen.x - width * 0.5f, Screen.height - screen.y - 8f, width, 6f);
-            GUI.Box(rect, GUIContent.none);
-            GUI.Box(new Rect(rect.x, rect.y, rect.width * pack.TearProgress, rect.height), GUIContent.none);
+            float width = UiSkin.Px(120f);
+            var rect = new Rect(screen.x - width * 0.5f, Screen.height - screen.y - UiSkin.Px(8f),
+                                width, UiSkin.Px(6f));
+
+            // Flat fills rather than the skin's frame: the meter is six pixels tall and
+            // a nine-slice with a four pixel border has nothing left to put in the middle.
+            Fill(rect, UiSkin.Ink);
+            Fill(new Rect(rect.x, rect.y, rect.width * pack.TearProgress, rect.height), UiSkin.Parchment);
+        }
+
+        static void Fill(Rect rect, Color colour)
+        {
+            Color was = GUI.color;
+            GUI.color = colour;
+            GUI.DrawTexture(rect, Texture2D.whiteTexture);
+            GUI.color = was;
         }
 
         void DrawSlotLabels()

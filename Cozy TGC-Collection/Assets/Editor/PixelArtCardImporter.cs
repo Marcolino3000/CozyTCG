@@ -10,14 +10,20 @@ namespace CozyTGC.EditorTools
     /// rendered on rotating 3D quads, and the shader's CardPixelUV filter snaps
     /// sampling to texel centres itself. That keeps the pixels crisp at any angle
     /// while the hardware still filters minification, so tilted cards do not crawl.
+    ///
+    /// Resources/UI is the exception and belongs to <see cref="UiKitImporter"/>: that
+    /// art is drawn flat in screen space, where every one of those choices is wrong.
     /// </summary>
     public class PixelArtCardImporter : AssetPostprocessor
     {
         public const string CardRoot = "Assets/Resources/";
 
+        static bool IsCardArt(string path) =>
+            path.StartsWith(CardRoot) && !path.StartsWith(UiKitImporter.UiRoot);
+
         void OnPreprocessTexture()
         {
-            if (!assetPath.StartsWith(CardRoot)) return;
+            if (!IsCardArt(assetPath)) return;
             var importer = (TextureImporter)assetImporter;
             // Only stamp brand new assets, never fight manual changes afterwards.
             if (!importer.importSettingsMissing) return;
@@ -66,6 +72,7 @@ namespace CozyTGC.EditorTools
                 foreach (string guid in guids)
                 {
                     string path = AssetDatabase.GUIDToAssetPath(guid);
+                    if (!IsCardArt(path)) continue;
                     if (AssetImporter.GetAtPath(path) is not TextureImporter importer) continue;
                     Apply(importer);
                     importer.SaveAndReimport();

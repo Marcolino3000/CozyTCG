@@ -13,8 +13,8 @@ namespace CozyTGC
     /// bottom right corner, and it stays up while the HUD is hidden - it is the way
     /// out of the scene, not a readout.
     ///
-    /// The picture is still to come. Until an <see cref="icon"/> is dropped in it
-    /// draws <see cref="label"/>, which becomes the tooltip once there is one.
+    /// Face and frame come from <see cref="UiSkin"/>: the kit's speech bubble on the
+    /// kit's button, unless an <see cref="icon"/> of its own is dropped in.
     /// </summary>
     [DisallowMultipleComponent]
     public class SceneLinkButton : MonoBehaviour
@@ -25,8 +25,9 @@ namespace CozyTGC
         [SerializeField] string sceneName = "DialogDemo";
 
         [Header("Face")]
-        [Tooltip("Optional. Fills the button once it is set, and the label becomes its tooltip.")]
+        [Tooltip("Optional. Drawn in place of the kit's speech bubble when it is set.")]
         [SerializeField] Texture2D icon;
+        [Tooltip("Tooltip, and what a missing kit sheet falls back to.")]
         [SerializeField] string label = "Talk";
         [Tooltip("Side of the square, in unscaled pixels, before the screen's own scale is applied.")]
         [SerializeField] float size = 64f;
@@ -35,8 +36,6 @@ namespace CozyTGC
 
         bool visible = true;
         Rect rect;
-        GUIStyle style;
-        float builtScale = -1f;
 
         /// <summary>
         /// Taken off screen while something modal is up. The shop dims the whole frame
@@ -66,21 +65,26 @@ namespace CozyTGC
                 return;
             }
 
-            // The shop's scale, so the two corners keep the same size to each other.
-            float scale = Mathf.Clamp(Screen.height / 900f, 1f, 1.8f);
-            EnsureStyle(scale);
+            UiSkin.Ensure();
 
-            float side = size * scale;
-            float pad = margin * scale;
+            float side = UiSkin.Px(size);
+            float pad = UiSkin.Px(margin);
             rect = new Rect(Screen.width - side - pad, Screen.height - side - pad, side, side);
 
-            // GUIContent(Texture, string) is picture and tooltip, with no text - so the
-            // label steps out of the way of the icon rather than sharing the button.
-            bool clicked = icon != null
-                ? GUI.Button(rect, new GUIContent(icon, label), style)
-                : GUI.Button(rect, label, style);
+            // The button carries the frame and the three states; the face goes on top of
+            // it afterwards, because a GUIStyle draws its content inside the padding and
+            // a picture this size wants the whole square.
+            bool clicked = GUI.Button(rect, new GUIContent(string.Empty, label), UiSkin.Button);
+
+            Rect face = Inset(rect, UiSkin.Px(10f));
+            if (icon != null) GUI.DrawTexture(face, icon, ScaleMode.ScaleToFit);
+            else UiSkin.DrawIcon(face, UiSheet.Icon.Speech, UiSkin.Ink);
+
             if (clicked) Go();
         }
+
+        static Rect Inset(Rect r, float by) =>
+            new Rect(r.x + by, r.y + by, r.width - by * 2f, r.height - by * 2f);
 
         void Go()
         {
@@ -94,21 +98,6 @@ namespace CozyTGC
             }
 
             SceneManager.LoadScene(sceneName);
-        }
-
-        void EnsureStyle(float scale)
-        {
-            if (style != null && Mathf.Approximately(builtScale, scale)) return;
-            builtScale = scale;
-
-            int inset = Mathf.RoundToInt(6f * scale);
-            style = new GUIStyle(GUI.skin.button)
-            {
-                fontSize = Mathf.RoundToInt(14 * scale),
-                // Small, even padding: an icon should fill the square rather than sit
-                // in the middle of a button's default text margins.
-                padding = new RectOffset(inset, inset, inset, inset),
-            };
         }
 
 #if UNITY_EDITOR

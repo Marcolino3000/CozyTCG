@@ -66,7 +66,7 @@ namespace CozyTGC
         float scale = 1f;
         float builtScale;
         GUIStyle panelStyle, titleStyle, tabStyle, tabOnStyle, rowStyle, rowTitleStyle,
-                 detailStyle, priceStyle, noteStyle, buttonStyle, purseStyle;
+                 detailStyle, priceStyle, noteStyle, buttonStyle, purseStyle, tabButtonStyle;
         Texture2D dim;
 
         Rect panelRect;
@@ -120,7 +120,8 @@ namespace CozyTGC
         // -------------------------------------------------------------------
         void OnGUI()
         {
-            scale = Mathf.Clamp(Screen.height / 900f, 1f, 1.8f);
+            UiSkin.Ensure();
+            scale = UiSkin.Scale;
             EnsureStyles();
 
             float pad = 12f * scale;
@@ -159,15 +160,25 @@ namespace CozyTGC
             float width = 104f * scale;
             float height = 28f * scale;
             var purse = new Rect(Screen.width - width - pad, pad, width, height);
-            GUI.Box(purse, $"{(customer != null ? customer.Coins : 0)} c", purseStyle);
+
+            // The coin says what the number is, so the number is only the number. Both
+            // styles keep a gutter open on the left in their padding, which is what the
+            // centred text is centred inside - the icon goes in the gutter afterwards.
+            GUI.Box(purse, $"{(customer != null ? customer.Coins : 0)}", purseStyle);
+            UiSkin.DrawIcon(Gutter(purse), UiSheet.Icon.Coin, UiSkin.Ink);
 
             chromeRect = purse;
             if (open) return;
 
             var tab = new Rect(purse.x, purse.yMax + 6f * scale, width, height);
-            if (GUI.Button(tab, "Shop", buttonStyle)) SetOpen(true);
+            if (GUI.Button(tab, "Shop", tabButtonStyle)) SetOpen(true);
+            UiSkin.DrawIcon(Gutter(tab), UiSheet.Icon.Cart, UiSkin.Ink);
             chromeRect = new Rect(purse.x, purse.y, width, tab.yMax - purse.y);
         }
+
+        /// <summary>The strip along the left of a corner box that its padding leaves free.</summary>
+        static Rect Gutter(Rect box) =>
+            new Rect(box.x + UiSkin.Px(5f), box.y, UiSkin.Px(18f), box.height);
 
         void DrawHeader()
         {
@@ -336,40 +347,49 @@ namespace CozyTGC
             }
         }
 
+        /// <summary>
+        /// Everything here is the shared skin with a size on it. The panel keeps the
+        /// light frame and the rows the darker one, so a list of them reads as a list
+        /// rather than as one long slab.
+        /// </summary>
         void EnsureStyles()
         {
             if (panelStyle != null && Mathf.Approximately(builtScale, scale)) return;
             builtScale = scale;
 
-            panelStyle = new GUIStyle(GUI.skin.box) { padding = Pad(12), stretchHeight = true };
-            titleStyle = new GUIStyle(GUI.skin.label) { fontStyle = FontStyle.Bold, fontSize = Font(18) };
-            purseStyle = new GUIStyle(GUI.skin.box)
+            panelStyle = new GUIStyle(UiSkin.Panel);
+            titleStyle = new GUIStyle(UiSkin.Title);
+
+            // Left padding wide enough for the icon that goes in beside the text.
+            var gutter = new RectOffset(Mathf.RoundToInt(24f * scale), Mathf.RoundToInt(6f * scale), 0, 0);
+            purseStyle = new GUIStyle(UiSkin.Panel)
             {
                 alignment = TextAnchor.MiddleCenter,
                 fontStyle = FontStyle.Bold,
                 fontSize = Font(16),
+                padding = gutter,
+                stretchHeight = false,
             };
-            tabStyle = new GUIStyle(GUI.skin.button) { fontSize = Font(14), fixedHeight = 28f * scale };
+            tabButtonStyle = new GUIStyle(UiSkin.Button) { fontSize = Font(14), padding = gutter };
+
+            tabStyle = new GUIStyle(UiSkin.Button) { fontSize = Font(14), fixedHeight = 28f * scale };
             tabOnStyle = new GUIStyle(tabStyle) { fontStyle = FontStyle.Bold };
-            rowStyle = new GUIStyle(GUI.skin.box) { padding = Pad(0) };
-            rowTitleStyle = new GUIStyle(GUI.skin.label) { fontStyle = FontStyle.Bold, fontSize = Font(15) };
-            detailStyle = new GUIStyle(GUI.skin.label) { wordWrap = true, fontSize = Font(12) };
-            priceStyle = new GUIStyle(GUI.skin.label) { alignment = TextAnchor.LowerLeft, fontSize = Font(14) };
-            noteStyle = new GUIStyle(GUI.skin.label)
+            rowStyle = new GUIStyle(UiSkin.Row);
+            rowTitleStyle = new GUIStyle(UiSkin.Label) { fontStyle = FontStyle.Bold, fontSize = Font(15) };
+            detailStyle = new GUIStyle(UiSkin.Detail) { fontSize = Font(12) };
+            priceStyle = new GUIStyle(UiSkin.Label)
             {
-                wordWrap = true,
+                alignment = TextAnchor.LowerLeft,
+                fontSize = Font(14),
+            };
+            noteStyle = new GUIStyle(UiSkin.Detail)
+            {
                 fontSize = Font(12),
                 fixedHeight = 34f * scale,
             };
-            buttonStyle = new GUIStyle(GUI.skin.button) { fontSize = Font(13) };
+            buttonStyle = new GUIStyle(UiSkin.Button) { fontSize = Font(13) };
         }
 
-        int Font(int size) => Mathf.RoundToInt(size * scale);
-
-        RectOffset Pad(int all)
-        {
-            int p = Mathf.RoundToInt(all * scale);
-            return new RectOffset(p, p, p, p);
-        }
+        int Font(int size) => UiSkin.Font(size);
     }
 }
