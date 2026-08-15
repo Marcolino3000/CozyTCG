@@ -16,11 +16,18 @@ namespace CozyTGC
     /// </summary>
     public static class UiSkin
     {
-        // The kit's palette, straight off the sheets. Ink is darker than anything in
-        // them - the art tops out at a mid brown, which does not read as text on a
-        // cream panel.
-        public static readonly Color Ink = new Color32(0x4A, 0x34, 0x2C, 0xFF);
-        public static readonly Color InkDim = new Color32(0x7A, 0x5C, 0x4E, 0xFF);
+        // The kit's palette, straight off the sheets. Both inks are darker than
+        // anything in them - the art tops out at a mid brown, which does not read as
+        // text on a cream panel.
+        //
+        // Darker than looks necessary against the swatches, on purpose. The project
+        // renders in linear colour, where small anti-aliased type on a light ground
+        // comes out thinner and paler than the colour picker promises: a mid brown that
+        // measures as readable draws as a grey suggestion of itself. Ink lands near 9:1
+        // against the panel and InkDim near 5:1 against the darker row frame, which is
+        // where 12 and 13 pixel type stops looking half transparent.
+        public static readonly Color Ink = new Color32(0x33, 0x22, 0x1B, 0xFF);
+        public static readonly Color InkDim = new Color32(0x5A, 0x42, 0x34, 0xFF);
         public static readonly Color Parchment = new Color32(0xE8, 0xCF, 0xA6, 0xFF);
 
         /// <summary>Everything on screen is measured in these, the panels included.</summary>
@@ -51,7 +58,10 @@ namespace CozyTGC
         /// </summary>
         public static void Ensure()
         {
-            float scale = Mathf.Clamp(Screen.height / 900f, 1f, 1.8f);
+            // Against 800 rather than 900, and allowed to reach twice size: the panels
+            // are read at a glance while a pack is waiting, and everything in them is
+            // pixel art that would rather be too big than too small.
+            float scale = Mathf.Clamp(Screen.height / 800f, 1f, 2f);
             if (built && Mathf.Approximately(scale, Scale)) return;
 
             Scale = scale;
@@ -106,7 +116,7 @@ namespace CozyTGC
             Label = new GUIStyle
             {
                 font = GUI.skin.label.font,
-                fontSize = Font(13),
+                fontSize = Font(15),
                 alignment = TextAnchor.UpperLeft,
                 wordWrap = false,
                 normal = { textColor = Ink },
@@ -114,13 +124,13 @@ namespace CozyTGC
 
             Title = new GUIStyle(Label)
             {
-                fontSize = Font(18),
+                fontSize = Font(20),
                 fontStyle = FontStyle.Bold,
             };
 
             Detail = new GUIStyle(Label)
             {
-                fontSize = Font(12),
+                fontSize = Font(14),
                 wordWrap = true,
                 normal = { textColor = InkDim },
             };
@@ -129,9 +139,9 @@ namespace CozyTGC
             {
                 normal = { background = frame, textColor = Ink },
                 border = UiSheet.FrameBorder(Zoom),
-                padding = Pad(12),
+                padding = Pad(14),
                 stretchHeight = true,
-                fontSize = Font(13),
+                fontSize = Font(15),
             };
 
             Row = new GUIStyle
@@ -154,9 +164,9 @@ namespace CozyTGC
                 onHover = { background = hovered, textColor = Ink },
                 onActive = { background = sunk, textColor = Ink },
                 border = UiSheet.ButtonBorder(Zoom),
-                padding = Pad(4),
+                padding = Pad(5),
                 alignment = TextAnchor.MiddleCenter,
-                fontSize = Font(13),
+                fontSize = Font(15),
                 font = GUI.skin.button.font,
                 richText = false,
             };

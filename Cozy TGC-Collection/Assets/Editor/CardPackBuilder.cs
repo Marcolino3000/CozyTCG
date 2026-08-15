@@ -37,6 +37,17 @@ namespace CozyTGC.EditorTools
         const string CardPrefabPath = "Assets/Prefabs/Card.prefab";
         const string CardMeshPath = "Assets/Meshes/CardQuad.asset";
         const string ScenePath = "Assets/Scenes/PackOpening.unity";
+        /// <summary>
+        /// The table under the whole scene. Built in rather than dropped into the scene
+        /// by hand, because this scene is generated - anything hand placed in it is gone
+        /// by the next rebuild, and a room with no floor is the one thing that is
+        /// noticed immediately.
+        /// </summary>
+        const string TableTexturePath =
+            "Assets/Resources/craiyon_203418_16x16_pixel_art_table_texture.png";
+        const string TableMaterialPath = "Assets/Materials/Table.mat";
+        /// <summary>Behind everything: the album's book sits at 0.06 and the shelf in front of that.</summary>
+        const float BackdropDepth = 1f;
         /// <summary>Where the corner button goes. Built by <see cref="DialogSceneBuilder"/>.</summary>
         const string DialogSceneName = "DialogDemo";
 
@@ -209,12 +220,14 @@ namespace CozyTGC.EditorTools
             Material pocketMaterial = BuildPocketMaterial(slotShader);
             Material traySlotMaterial = BuildTraySlotMaterial(slotShader);
             Material trayPackMaterial = BuildTrayPackMaterial(spriteShader);
+            Material tableMaterial = BuildTableMaterial(spriteShader);
             Material[] bookMaterials = BuildBookMaterials(spriteShader);
             Material[] iconMaterials = BuildIconMaterials(spriteShader);
             GameObject prefab = BuildPrefab(body, lid, material, tearY);
             GameObject slotPrefab = BuildSlotPrefab(cardMesh, slotMaterial);
             BuildScene(prefab, slotPrefab, cardPrefab, unitQuad, pocketMaterial,
-                       traySlotMaterial, trayPackMaterial, bookMaterials, iconMaterials);
+                       traySlotMaterial, trayPackMaterial, bookMaterials, iconMaterials,
+                       tableMaterial);
 
             AssetDatabase.SaveAssets();
             AssetDatabase.Refresh();
@@ -556,6 +569,27 @@ namespace CozyTGC.EditorTools
             return result;
         }
 
+        /// <summary>
+        /// The table top. One picture rather than a cell of a sheet, so the UV rect is
+        /// the whole thing - the sprite shader is used all the same, because it is this
+        /// project's flat unlit quad and it keeps the pixels crisp.
+        /// </summary>
+        static Material BuildTableMaterial(Shader shader)
+        {
+            var texture = AssetDatabase.LoadAssetAtPath<Texture2D>(TableTexturePath);
+            if (texture == null)
+            {
+                // No material and therefore no backdrop: the camera's flat colour is
+                // still there behind everything, which is what the scene had before.
+                Debug.LogWarning($"[Cozy TGC] No table texture at {TableTexturePath} - " +
+                                 "the scene is built without a background.");
+                return null;
+            }
+
+            return BuildSheetMaterial(shader, "Table", texture, new Vector4(0f, 0f, 1f, 1f),
+                                      texture.width, texture.height);
+        }
+
         static Material BuildSheetMaterial(Shader shader, string name, Texture2D sheet,
                                            Vector4 rect, int cellWidth, int cellHeight)
         {
@@ -791,7 +825,8 @@ namespace CozyTGC.EditorTools
         static void BuildScene(GameObject packPrefab, GameObject slotPrefab, GameObject cardPrefab,
                                Mesh unitQuad, Material pocketMaterial,
                                Material traySlotMaterial, Material trayPackMaterial,
-                               Material[] bookMaterials, Material[] iconMaterials)
+                               Material[] bookMaterials, Material[] iconMaterials,
+                               Material tableMaterial)
         {
             var scene = EditorSceneManager.NewScene(NewSceneSetup.EmptyScene, NewSceneMode.Single);
 
@@ -810,6 +845,11 @@ namespace CozyTGC.EditorTools
             // Hover and click-to-flip only: in this scene a drag moves the card to
             // another slot, which PackOpeningController picks up.
             camGO.GetComponent<CardInteractor>().EditorBind(cam, CardInteractor.DragBehaviour.HandOff);
+
+            // The table, before anything that stands on it. The camera's flat colour is
+            // left as it was: it is what shows through the corners while a window is
+            // being dragged to a shape the backdrop has not caught up with.
+            BuildBackdrop(cam, unitQuad, tableMaterial);
 
             var lightGO = new GameObject("Directional Light", typeof(Light));
             var light = lightGO.GetComponent<Light>();
@@ -907,6 +947,21 @@ namespace CozyTGC.EditorTools
             EditorSceneManager.MarkSceneDirty(scene);
             EditorSceneManager.SaveScene(scene, ScenePath);
             AddSceneToBuildSettings(ScenePath);
+        }
+
+        /// <summary>
+        /// The table top, sized to the frame by <see cref="SceneBackdrop"/> from here on.
+        /// Unlit and alpha tested like every other flat quad in the scene, so it takes
+        /// no light and never picks up the directional's warm side.
+        /// </summary>
+        static void BuildBackdrop(Camera cam, Mesh quad, Material material)
+        {
+            if (material == null) return;
+
+            var backdropGO = new GameObject("Background", typeof(SceneBackdrop));
+            backdropGO.AddComponent<MeshFilter>().sharedMesh = quad;
+            ConfigureRenderer(backdropGO.AddComponent<MeshRenderer>(), material);
+            backdropGO.GetComponent<SceneBackdrop>().EditorBind(cam, BackdropDepth);
         }
 
         static void AddSceneToBuildSettings(string path)

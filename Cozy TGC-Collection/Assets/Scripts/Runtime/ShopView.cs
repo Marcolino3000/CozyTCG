@@ -37,18 +37,18 @@ namespace CozyTGC
         enum Shelf { Buy, Sell }
 
         [Header("Panel")]
-        [Tooltip("Size in unscaled pixels, before the screen's own scale is applied. " +
-                 "Clamped to the frame, so a small window gets a smaller panel rather " +
-                 "than one hanging off the edges.")]
-        [SerializeField] float panelWidth = 620f;
-        [SerializeField] float panelHeight = 660f;
+        [Tooltip("Gap left between the panel and the edge of the screen, in unscaled " +
+                 "pixels. The panel takes everything inside it: a card shop is a wall of " +
+                 "pictures and prices, and a box in the middle of the frame reads small " +
+                 "however big the type in it is.")]
+        [SerializeField] float edgeMargin = 48f;
         [Tooltip("How tall one item is, which is also how big its picture gets - the two " +
                  "knobs to turn if the previews want to be larger still.")]
-        [SerializeField] float rowHeight = 150f;
+        [SerializeField] float rowHeight = 225f;
         [Tooltip("Width the picture is fitted into. A card and a wrapper are both taller " +
                  "than they are wide, so the row height usually decides the size and this " +
                  "only has to leave them room.")]
-        [SerializeField] float iconWidth = 110f;
+        [SerializeField] float iconWidth = 168f;
         [Tooltip("How long a purchase or sale stays on the line under the tabs.")]
         [SerializeField] float messageTime = 2.6f;
 
@@ -124,41 +124,47 @@ namespace CozyTGC
             scale = UiSkin.Scale;
             EnsureStyles();
 
-            float pad = 12f * scale;
+            float pad = edgeMargin * scale;
 
             // Before the corner, so the purse stays crisp over a dimmed frame rather
             // than being dimmed along with the table.
             if (open) GUI.DrawTexture(new Rect(0f, 0f, Screen.width, Screen.height), Dim);
-            DrawCorner(pad);
+
+            // And before the panel, which is what keeps the corner clickable while the
+            // shop is open: IMGUI hands a click to whichever control asked for it first,
+            // so the corner is drawn first and the panel leaves its block free.
+            float corner = DrawCorner(pad);
 
             if (!open) { panelRect = Rect.zero; return; }
 
-            float panelW = Mathf.Min(panelWidth * scale, Screen.width - pad * 2f);
-            float panelH = Mathf.Min(panelHeight * scale, Screen.height - pad * 2f);
-            panelRect = new Rect((Screen.width - panelW) * 0.5f, (Screen.height - panelH) * 0.5f, panelW, panelH);
+            panelRect = new Rect(pad, pad, Screen.width - pad * 2f, Screen.height - pad * 2f);
 
             GUILayout.BeginArea(panelRect, panelStyle);
-            DrawHeader();
-            DrawTabs();
+            DrawHeader(corner);
+            DrawTabs(corner);
             DrawMessage();
             if (shelf == Shelf.Buy) DrawBuyShelf(); else DrawSellShelf();
             GUILayout.EndArea();
         }
 
         /// <summary>
-        /// The purse, and the tab under it. The purse is on screen whatever else is:
-        /// the panel is where money is spent, but knowing how much there is decides
-        /// whether to open it at all - so it does not live inside it, and it does not
-        /// go away with the rest of the HUD either.
+        /// The purse, and the tab under it. Both are on screen whatever else is: the
+        /// panel is where money is spent, but knowing how much there is decides whether
+        /// to open it at all - so the purse does not live inside it, and it does not go
+        /// away with the rest of the HUD either.
         ///
-        /// The tab is drawn only while the shop is shut. The open panel carries its own
-        /// close button, and a tab left under it would eat the clicks landing on the
-        /// panel over it - IMGUI gives an event to whichever control asked for it first.
+        /// The tab stays up with the shop open, and shuts it again - one button that
+        /// goes in and comes back out, rather than one to open and a different one to
+        /// close. It draws before the panel so that the click is the tab's: IMGUI hands
+        /// an event to whichever control asked for it first, and the panel keeps this
+        /// block clear rather than racing it.
+        ///
+        /// Hands back the width the panel has to leave alone.
         /// </summary>
-        void DrawCorner(float pad)
+        float DrawCorner(float pad)
         {
-            float width = 104f * scale;
-            float height = 28f * scale;
+            float width = 164f * scale;
+            float height = 40f * scale;
             var purse = new Rect(Screen.width - width - pad, pad, width, height);
 
             // The coin says what the number is, so the number is only the number. Both
@@ -167,33 +173,46 @@ namespace CozyTGC
             GUI.Box(purse, $"{(customer != null ? customer.Coins : 0)}", purseStyle);
             UiSkin.DrawIcon(Gutter(purse), UiSheet.Icon.Coin, UiSkin.Ink);
 
-            chromeRect = purse;
-            if (open) return;
-
             var tab = new Rect(purse.x, purse.yMax + 6f * scale, width, height);
-            if (GUI.Button(tab, "Shop", tabButtonStyle)) SetOpen(true);
-            UiSkin.DrawIcon(Gutter(tab), UiSheet.Icon.Cart, UiSkin.Ink);
+            if (GUI.Button(tab, "Shop", tabButtonStyle)) SetOpen(!open);
+            // A cross while it is open: the button is the way out as well as the way in,
+            // and the cart on a shop that is already up says nothing.
+            UiSkin.DrawIcon(Gutter(tab), open ? UiSheet.Icon.Cross : UiSheet.Icon.Cart, UiSkin.Ink);
+
             chromeRect = new Rect(purse.x, purse.y, width, tab.yMax - purse.y);
+            return width + pad;
         }
 
         /// <summary>The strip along the left of a corner box that its padding leaves free.</summary>
         static Rect Gutter(Rect box) =>
-            new Rect(box.x + UiSkin.Px(5f), box.y, UiSkin.Px(18f), box.height);
+            new Rect(box.x + UiSkin.Px(8f), box.y, UiSkin.Px(26f), box.height);
 
-        void DrawHeader()
+        /// <summary>
+        /// <paramref name="corner"/> is the block the purse and the tab sit in, over the
+        /// panel's top right. Both rows that reach that far end short of it, so nothing
+        /// of the panel's own is hiding under a button that answers first.
+        /// </summary>
+        void DrawHeader(float corner)
         {
             GUILayout.BeginHorizontal();
             GUILayout.Label("The Card Counter", titleStyle);
             GUILayout.FlexibleSpace();
-            if (GUILayout.Button("Close", buttonStyle, GUILayout.Width(72f * scale))) SetOpen(false);
+            if (GUILayout.Button("Close", buttonStyle, GUILayout.Width(120f * scale))) SetOpen(false);
+            GUILayout.Space(corner);
             GUILayout.EndHorizontal();
         }
 
-        void DrawTabs()
+        void DrawTabs(float corner)
         {
+            // Held to a readable width rather than split across the whole panel: on a
+            // full screen shelf a half-width Buy button is a banner, not a tab.
+            var width = GUILayout.Width(190f * scale);
+
             GUILayout.BeginHorizontal();
-            if (GUILayout.Button("Buy", shelf == Shelf.Buy ? tabOnStyle : tabStyle)) shelf = Shelf.Buy;
-            if (GUILayout.Button("Sell", shelf == Shelf.Sell ? tabOnStyle : tabStyle)) shelf = Shelf.Sell;
+            if (GUILayout.Button("Buy", shelf == Shelf.Buy ? tabOnStyle : tabStyle, width)) shelf = Shelf.Buy;
+            if (GUILayout.Button("Sell", shelf == Shelf.Sell ? tabOnStyle : tabStyle, width)) shelf = Shelf.Sell;
+            GUILayout.FlexibleSpace();
+            GUILayout.Space(corner);
             GUILayout.EndHorizontal();
         }
 
@@ -282,23 +301,23 @@ namespace CozyTGC
 
             var body = new Rect(iconBox.xMax + inset * 1.5f, row.y + inset,
                                 row.xMax - iconBox.xMax - inset * 2.5f, row.height - inset * 2f);
-            GUI.Label(new Rect(body.x, body.y, body.width, 22f * scale), title, rowTitleStyle);
+            GUI.Label(new Rect(body.x, body.y, body.width, 38f * scale), title, rowTitleStyle);
             // Stops short of the price line along the bottom, which shares the row.
-            GUI.Label(new Rect(body.x, body.y + 22f * scale, body.width, body.height - 52f * scale),
+            GUI.Label(new Rect(body.x, body.y + 38f * scale, body.width, body.height - 84f * scale),
                       detail, detailStyle);
             return body;
         }
 
         void DrawPrice(Rect body, string text)
         {
-            GUI.Label(new Rect(body.x, body.yMax - 26f * scale, body.width - 84f * scale, 24f * scale),
+            GUI.Label(new Rect(body.x, body.yMax - 40f * scale, body.width - 152f * scale, 38f * scale),
                       text, priceStyle);
         }
 
         bool DrawAction(Rect body, string label)
         {
-            return GUI.Button(new Rect(body.xMax - 76f * scale, body.yMax - 28f * scale,
-                                       76f * scale, 26f * scale), label, buttonStyle);
+            return GUI.Button(new Rect(body.xMax - 138f * scale, body.yMax - 44f * scale,
+                                       138f * scale, 42f * scale), label, buttonStyle);
         }
 
         /// <summary>
@@ -341,7 +360,10 @@ namespace CozyTGC
                 if (dim != null) return dim;
 
                 dim = new Texture2D(1, 1) { hideFlags = HideFlags.HideAndDontSave };
-                dim.SetPixel(0, 0, new Color(0.03f, 0.03f, 0.05f, 0.72f));
+                // Deep enough that the panel is the only lit thing on screen. The
+                // table behind is warm and busy, and a shy dim left the cream frame
+                // sitting on top of it looking like tracing paper.
+                dim.SetPixel(0, 0, new Color(0.03f, 0.03f, 0.05f, 0.86f));
                 dim.Apply();
                 return dim;
             }
@@ -358,7 +380,10 @@ namespace CozyTGC
             builtScale = scale;
 
             panelStyle = new GUIStyle(UiSkin.Panel);
-            titleStyle = new GUIStyle(UiSkin.Title);
+            // The shop takes the whole frame, so its type is a size up on the pack HUD's
+            // rather than the same: a panel this big with small print in it reads as a
+            // wall of grey.
+            titleStyle = new GUIStyle(UiSkin.Title) { fontSize = Font(30) };
 
             // Left padding wide enough for the icon that goes in beside the text.
             var gutter = new RectOffset(Mathf.RoundToInt(24f * scale), Mathf.RoundToInt(6f * scale), 0, 0);
@@ -366,28 +391,36 @@ namespace CozyTGC
             {
                 alignment = TextAnchor.MiddleCenter,
                 fontStyle = FontStyle.Bold,
-                fontSize = Font(16),
+                fontSize = Font(23),
                 padding = gutter,
                 stretchHeight = false,
             };
-            tabButtonStyle = new GUIStyle(UiSkin.Button) { fontSize = Font(14), padding = gutter };
+            tabButtonStyle = new GUIStyle(UiSkin.Button) { fontSize = Font(21), padding = gutter };
 
-            tabStyle = new GUIStyle(UiSkin.Button) { fontSize = Font(14), fixedHeight = 28f * scale };
+            tabStyle = new GUIStyle(UiSkin.Button) { fontSize = Font(21), fixedHeight = 42f * scale };
             tabOnStyle = new GUIStyle(tabStyle) { fontStyle = FontStyle.Bold };
             rowStyle = new GUIStyle(UiSkin.Row);
-            rowTitleStyle = new GUIStyle(UiSkin.Label) { fontStyle = FontStyle.Bold, fontSize = Font(15) };
-            detailStyle = new GUIStyle(UiSkin.Detail) { fontSize = Font(12) };
+            rowTitleStyle = new GUIStyle(UiSkin.Label) { fontStyle = FontStyle.Bold, fontSize = Font(23) };
+            // A row's copy is the smallest type on screen and the most of it, so it is
+            // the one place the dim ink is dropped: it sits on the darker row frame,
+            // where a lighter brown is exactly the "why is this faded" of the panel.
+            detailStyle = new GUIStyle(UiSkin.Detail)
+            {
+                fontSize = Font(19),
+                normal = { textColor = UiSkin.Ink },
+            };
             priceStyle = new GUIStyle(UiSkin.Label)
             {
                 alignment = TextAnchor.LowerLeft,
-                fontSize = Font(14),
+                fontStyle = FontStyle.Bold,
+                fontSize = Font(21),
             };
             noteStyle = new GUIStyle(UiSkin.Detail)
             {
-                fontSize = Font(12),
-                fixedHeight = 34f * scale,
+                fontSize = Font(19),
+                fixedHeight = 56f * scale,
             };
-            buttonStyle = new GUIStyle(UiSkin.Button) { fontSize = Font(13) };
+            buttonStyle = new GUIStyle(UiSkin.Button) { fontSize = Font(20) };
         }
 
         int Font(int size) => UiSkin.Font(size);

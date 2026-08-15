@@ -1229,7 +1229,10 @@ namespace CozyTGC
 
             // The labels over the table keep the plain white face on purpose: they sit
             // on the wood, not on a panel, and the skin's ink is meant for parchment.
-            labelStyle ??= new GUIStyle(GUI.skin.label) { alignment = TextAnchor.MiddleCenter, fontSize = 12 };
+            labelStyle ??= new GUIStyle(GUI.skin.label) { alignment = TextAnchor.MiddleCenter };
+            // Sized every pass rather than once: the style is built the first time round
+            // and the screen scale it should follow is not known until UiSkin has run.
+            labelStyle.fontSize = UiSkin.Font(14);
             titleStyle = UiSkin.Title;
 
             DrawSlotLabels();
@@ -1240,7 +1243,7 @@ namespace CozyTGC
             // No album buttons here: the shelf of books down the left is the menu,
             // and it stays on screen when the HUD is hidden - as do the shop's own
             // tab in the opposite corner and the dialog button under it.
-            GUILayout.BeginArea(new Rect(UiSkin.Px(12f), UiSkin.Px(12f), UiSkin.Px(320f), UiSkin.Px(240f)),
+            GUILayout.BeginArea(new Rect(UiSkin.Px(14f), UiSkin.Px(14f), UiSkin.Px(390f), UiSkin.Px(300f)),
                                 UiSkin.Panel);
             GUILayout.Label("Cozy TGC - Pack Opening", titleStyle);
             GUILayout.Label(Hint(), UiSkin.Detail);
@@ -1304,9 +1307,9 @@ namespace CozyTGC
             Vector3 screen = cam.WorldToScreenPoint(world);
             if (screen.z <= 0f) return;
 
-            float width = UiSkin.Px(120f);
-            var rect = new Rect(screen.x - width * 0.5f, Screen.height - screen.y - UiSkin.Px(8f),
-                                width, UiSkin.Px(6f));
+            float width = UiSkin.Px(150f);
+            var rect = new Rect(screen.x - width * 0.5f, Screen.height - screen.y - UiSkin.Px(10f),
+                                width, UiSkin.Px(8f));
 
             // Flat fills rather than the skin's frame: the meter is six pixels tall and
             // a nine-slice with a four pixel border has nothing left to put in the middle.
@@ -1338,7 +1341,7 @@ namespace CozyTGC
                 string text = slot.Count > 0 ? $"{slot.Label}  {slot.Count}" : slot.Label;
                 if (slot.IsDefault) text += "  *";
 
-                GUI.Label(new Rect(screen.x - 70f, Screen.height - screen.y - 10f, 140f, 20f), text, labelStyle);
+                Label(screen, 170f, text);
             }
         }
 
@@ -1349,8 +1352,7 @@ namespace CozyTGC
             Vector3 screen = cam.WorldToScreenPoint(heldCard.transform.position + Vector3.down * 0.7f);
             if (screen.z <= 0f) return;
 
-            GUI.Label(new Rect(screen.x - 90f, Screen.height - screen.y - 10f, 180f, 20f),
-                      catalog.FullNameOf(heldCard.Identity), labelStyle);
+            Label(screen, 210f, catalog.FullNameOf(heldCard.Identity));
         }
 
         /// <summary>How many packs are in the drawer, printed under it.</summary>
@@ -1362,7 +1364,20 @@ namespace CozyTGC
             if (screen.z <= 0f) return;
 
             string text = packs > 0 ? $"{packs} pack{(packs == 1 ? "" : "s")}" : "empty";
-            GUI.Label(new Rect(screen.x - 60f, Screen.height - screen.y - 10f, 120f, 20f), text, labelStyle);
+            Label(screen, 150f, text);
+        }
+
+        /// <summary>
+        /// One of the labels that sit on the table rather than on a panel: centred under
+        /// a point in the world, in a box that grows with the screen scale so the text
+        /// is not clipped at the size the skin is drawing at.
+        /// </summary>
+        void Label(Vector3 screen, float unscaledWidth, string text)
+        {
+            float width = UiSkin.Px(unscaledWidth);
+            float height = UiSkin.Px(24f);
+            GUI.Label(new Rect(screen.x - width * 0.5f, Screen.height - screen.y - height * 0.5f,
+                               width, height), text, labelStyle);
         }
 
 #if UNITY_EDITOR
