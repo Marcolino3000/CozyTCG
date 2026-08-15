@@ -18,314 +18,263 @@ MonoBehaviour:
     price: 100
     goods: 0
     count: 1
-    preview: {fileID: 0}
+    card: {fileID: 0}
+    finish: 0
   - title: Booster packs x3
     detail: Three sealed packs, a tenth off the single price.
     price: 270
     goods: 0
     count: 3
-    preview: {fileID: 0}
+    card: {fileID: 0}
+    finish: 0
   - title: Half a box
     detail: Five packs. An afternoon's opening, at a fair discount.
     price: 440
     goods: 0
     count: 5
-    preview: {fileID: 0}
+    card: {fileID: 0}
+    finish: 0
   - title: A box of ten
     detail: Ten packs at once. The cheapest wrappers in the shop.
     price: 850
     goods: 0
     count: 10
-    preview: {fileID: 0}
+    card: {fileID: 0}
+    finish: 0
   - title: Random card
     detail: One loose card off the rack. Deck and finish unseen.
     price: 30
     goods: 1
     count: 1
-    preview: {fileID: 0}
+    card: {fileID: 0}
+    finish: 0
   - title: Random cards x5
     detail: Five loose cards, dealt straight onto the default pile.
     price: 130
     goods: 1
     count: 5
-    preview: {fileID: 0}
+    card: {fileID: 0}
+    finish: 0
   - title: Random cards x10
     detail: Ten off the rack. Filling a suit the slow, certain way.
     price: 250
     goods: 1
     count: 10
-    preview: {fileID: 0}
+    card: {fileID: 0}
+    finish: 0
   - title: A handful
     detail: Twenty in one go. Good odds on something that glitters.
     price: 480
     goods: 1
     count: 20
-    preview: {fileID: 0}
+    card: {fileID: 0}
+    finish: 0
   ads:
   - title: looking for holo judement card!!
     detail: '!!1!1!'
     price: 750
-    preview: {fileID: 0}
     wants:
-    - deck: -1
-      face: 20
+    - card: {fileID: 11400000, guid: ce4d86de2556b4ce6a3fe0254404bf85, type: 2}
+      deck: -1
       suit: -1
-      finish: -1
+      finish: 2
       count: 1
   - title: The Tower
     detail: 'Wanted: the Tower from the tarot. Any finish, it is for a friend.'
     price: 150
-    preview: {fileID: 0}
     wants:
-    - deck: -1
-      face: 16
+    - card: {fileID: 11400000, guid: cb757f644a85649bcb7a1678e560e2fe, type: 2}
+      deck: -1
       suit: -1
       finish: -1
       count: 1
   - title: Two of the Fool
     detail: 'Wanted: two Fools. One to keep, one to trade on.'
     price: 260
-    preview: {fileID: 0}
     wants:
-    - deck: -1
-      face: 0
+    - card: {fileID: 11400000, guid: f139bfe50b24d428bab799ccda131dee, type: 2}
+      deck: -1
       suit: -1
       finish: -1
       count: 2
   - title: The Sun and the Moon
     detail: 'Wanted: the pair of them, and they must be the pair.'
     price: 340
-    preview: {fileID: 0}
     wants:
-    - deck: -1
-      face: 19
+    - card: {fileID: 11400000, guid: 379b0c5ae8a4c40869b93dd0eb1259ee, type: 2}
+      deck: -1
       suit: -1
       finish: -1
       count: 1
-    - deck: -1
-      face: 18
+    - card: {fileID: 11400000, guid: 3e2ec728868c44c64b218a06892f78bf, type: 2}
+      deck: -1
       suit: -1
       finish: -1
       count: 1
   - title: The Rey de Bastos
     detail: 'Wanted: the king of clubs, Spanish style. Any finish.'
     price: 180
-    preview: {fileID: 0}
     wants:
-    - deck: -1
-      face: 39
+    - card: {fileID: 11400000, guid: ea709452c26e3413d96ee2c0b9dbb3ed, type: 2}
+      deck: -1
       suit: -1
       finish: -1
       count: 1
   - title: The 4 of every suit
     detail: 'Wanted: the 4 from all four suits of the Spanish deck. Any finish.'
     price: 600
-    preview: {fileID: 0}
     wants:
-    - deck: -1
-      face: 3
+    - card: {fileID: 11400000, guid: ef2c9954d74244319b97d6ed8b1c5532, type: 2}
+      deck: -1
       suit: -1
       finish: -1
       count: 1
-    - deck: -1
-      face: 13
+    - card: {fileID: 11400000, guid: 179f5397b02754f02ba639173a07fd98, type: 2}
+      deck: -1
       suit: -1
       finish: -1
       count: 1
-    - deck: -1
-      face: 23
+    - card: {fileID: 11400000, guid: 9228cc1fb948d4974ac566221f4f8478, type: 2}
+      deck: -1
       suit: -1
       finish: -1
       count: 1
-    - deck: -1
-      face: 33
+    - card: {fileID: 11400000, guid: db2dcab6d7a5d4bed9c6df92ed5d5aaa, type: 2}
+      deck: -1
       suit: -1
       finish: -1
       count: 1
   - title: The Rey of every suit
     detail: 'Wanted: all four kings. Oros, Copas, Espadas, Bastos.'
     price: 700
-    preview: {fileID: 0}
     wants:
-    - deck: -1
-      face: 9
+    - card: {fileID: 11400000, guid: 873de6b8497974535b5928139528a124, type: 2}
+      deck: -1
       suit: -1
       finish: -1
       count: 1
-    - deck: -1
-      face: 19
+    - card: {fileID: 11400000, guid: 254d1b4456f184f129c12cf1a6f9b8f3, type: 2}
+      deck: -1
       suit: -1
       finish: -1
       count: 1
-    - deck: -1
-      face: 29
+    - card: {fileID: 11400000, guid: 55e9b24955588472a8eb5ad750fdfe95, type: 2}
+      deck: -1
       suit: -1
       finish: -1
       count: 1
-    - deck: -1
-      face: 39
+    - card: {fileID: 11400000, guid: ea709452c26e3413d96ee2c0b9dbb3ed, type: 2}
+      deck: -1
       suit: -1
       finish: -1
       count: 1
   - title: 'Complete set: Copas'
     detail: 'Wanted: every one of the ten Copas. Pays for the lot.'
     price: 1200
-    preview: {fileID: 0}
     wants:
-    - deck: -1
-      face: 10
+    - card: {fileID: 11400000, guid: db18e67e4199a4d848e32bf4ec62dcca, type: 2}
+      deck: -1
       suit: -1
       finish: -1
       count: 1
-    - deck: -1
-      face: 11
+    - card: {fileID: 11400000, guid: d30fa478f2cb0485c89ab923f9443b20, type: 2}
+      deck: -1
       suit: -1
       finish: -1
       count: 1
-    - deck: -1
-      face: 12
+    - card: {fileID: 11400000, guid: 9c6e308044af947938c4e7846f9ed7aa, type: 2}
+      deck: -1
       suit: -1
       finish: -1
       count: 1
-    - deck: -1
-      face: 13
+    - card: {fileID: 11400000, guid: 179f5397b02754f02ba639173a07fd98, type: 2}
+      deck: -1
       suit: -1
       finish: -1
       count: 1
-    - deck: -1
-      face: 14
+    - card: {fileID: 11400000, guid: 1fe0c2e269b434c1e880131ec3c1aa0f, type: 2}
+      deck: -1
       suit: -1
       finish: -1
       count: 1
-    - deck: -1
-      face: 15
+    - card: {fileID: 11400000, guid: bf99ba631772345e591ef97815363e5d, type: 2}
+      deck: -1
       suit: -1
       finish: -1
       count: 1
-    - deck: -1
-      face: 16
+    - card: {fileID: 11400000, guid: 398d1bd44ccde46a695b30eae049bed4, type: 2}
+      deck: -1
       suit: -1
       finish: -1
       count: 1
-    - deck: -1
-      face: 17
+    - card: {fileID: 11400000, guid: 20b0283c91e394474b2ce1ba10d59850, type: 2}
+      deck: -1
       suit: -1
       finish: -1
       count: 1
-    - deck: -1
-      face: 18
+    - card: {fileID: 11400000, guid: bca25a0957b1547d3873881e60e11edb, type: 2}
+      deck: -1
       suit: -1
       finish: -1
       count: 1
-    - deck: -1
-      face: 19
+    - card: {fileID: 11400000, guid: 254d1b4456f184f129c12cf1a6f9b8f3, type: 2}
+      deck: -1
       suit: -1
       finish: -1
       count: 1
   - title: 'Complete set: Oros'
     detail: 'Wanted: all ten Oros, 1 through Rey. Pays for the lot.'
     price: 1200
-    preview: {fileID: 0}
     wants:
-    - deck: -1
-      face: 0
+    - card: {fileID: 11400000, guid: c873cfa9f9b17466898efdccec234e2e, type: 2}
+      deck: -1
       suit: -1
       finish: -1
       count: 1
-    - deck: -1
-      face: 1
+    - card: {fileID: 11400000, guid: 6ac435c7286344bed8a613b7d00a979f, type: 2}
+      deck: -1
       suit: -1
       finish: -1
       count: 1
-    - deck: -1
-      face: 2
+    - card: {fileID: 11400000, guid: 4ef40f0e1c5b349eab6b34bae85d0b8f, type: 2}
+      deck: -1
       suit: -1
       finish: -1
       count: 1
-    - deck: -1
-      face: 3
+    - card: {fileID: 11400000, guid: ef2c9954d74244319b97d6ed8b1c5532, type: 2}
+      deck: -1
       suit: -1
       finish: -1
       count: 1
-    - deck: -1
-      face: 4
+    - card: {fileID: 11400000, guid: f25ca0bf3fcc7411fb267bf735b36262, type: 2}
+      deck: -1
       suit: -1
       finish: -1
       count: 1
-    - deck: -1
-      face: 5
+    - card: {fileID: 11400000, guid: 51243cc2643884bee95abf7d6d5e2b64, type: 2}
+      deck: -1
       suit: -1
       finish: -1
       count: 1
-    - deck: -1
-      face: 6
+    - card: {fileID: 11400000, guid: 64cc5d97577314af799fdb60024c397b, type: 2}
+      deck: -1
       suit: -1
       finish: -1
       count: 1
-    - deck: -1
-      face: 7
+    - card: {fileID: 11400000, guid: d7c6d8f077de54e2fa07d6c4c3d7c866, type: 2}
+      deck: -1
       suit: -1
       finish: -1
       count: 1
-    - deck: -1
-      face: 8
+    - card: {fileID: 11400000, guid: a836005717bd44ccdbc24ff7566f36af, type: 2}
+      deck: -1
       suit: -1
       finish: -1
       count: 1
-    - deck: -1
-      face: 9
+    - card: {fileID: 11400000, guid: 873de6b8497974535b5928139528a124, type: 2}
+      deck: -1
       suit: -1
       finish: -1
       count: 1
-  - title: Three shiny Espadas
-    detail: 'Wanted: three swords with some shine on them. Which ones is your business.'
-    price: 420
-    preview: {fileID: 0}
-    wants:
-    - deck: -1
-      face: -1
-      suit: 2
-      finish: -1
-      count: 3
-  - title: Three tarot cards
-    detail: 'Wanted: any three of the majors. A reading, not a collection.'
-    price: 200
-    preview: {fileID: 0}
-    wants:
-    - deck: -1
-      face: -1
-      suit: -1
-      finish: -1
-      count: 3
-  - title: Three cards in holo
-    detail: 'Wanted: any three cards, holo or better. Deck does not matter.'
-    price: 400
-    preview: {fileID: 0}
-    wants:
-    - deck: -1
-      face: -1
-      suit: -1
-      finish: -1
-      count: 3
-  - title: Five cards in shiny
-    detail: 'Wanted: any five cards with a bit of shine on them.'
-    price: 300
-    preview: {fileID: 0}
-    wants:
-    - deck: -1
-      face: -1
-      suit: -1
-      finish: -1
-      count: 5
-  - title: Eight cards, any at all
-    detail: 'Wanted: eight cards. No, really - any eight. Clearing a gap in a folder.'
-    price: 240
-    preview: {fileID: 0}
-    wants:
-    - deck: -1
-      face: -1
-      suit: -1
-      finish: -1
-      count: 8
   adsOnBoard: 6
   topUpWithRolledAds: 1

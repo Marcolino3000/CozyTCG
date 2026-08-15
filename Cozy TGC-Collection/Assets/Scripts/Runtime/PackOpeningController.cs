@@ -54,11 +54,12 @@ namespace CozyTGC
         [SerializeField] GameObject cardPrefab;
 
         [Header("Contents")]
-        [SerializeField] List<CardArtSet> artSets = new List<CardArtSet>();
+        [Tooltip("The decks a pack is rolled from, in the order CardDeck names them. " +
+                 "Authored assets under Assets/Cards - the price and the pull weight of " +
+                 "every single card are on the cards inside them.")]
+        [SerializeField] List<CardDeckData> cardDecks = new List<CardDeckData>();
         [SerializeField] List<Material> rarityMaterials = new List<Material>();
         [SerializeField] List<string> rarityNames = new List<string>();
-        [Tooltip("Pull weight per rarity, in the same order as the materials.")]
-        [SerializeField] List<float> rarityWeights = new List<float> { 62f, 20f, 10f, 5f, 3f };
         [Tooltip("Lowest rarity the last card in a pack may roll, so every pack " +
                  "finishes on something worth turning over.")]
         [SerializeField] int guaranteedTier = 1;
@@ -169,11 +170,14 @@ namespace CozyTGC
         void Awake()
         {
             if (cam == null) cam = Camera.main;
-            foreach (var set in artSets) set.Load();
             if (pack != null) pack.Opened += OnPackOpened;
             if (packRig != null) rigRest = packRig.position;
 
-            catalog = new CardCatalog(artSets, rarityNames);
+            if (cardDecks.Count == 0)
+                Debug.LogError("[Cozy TGC] No card decks on PackOpeningController - run " +
+                               "Tools > Cozy TGC > Build Card Assets, then Build Pack Opening Scene.");
+
+            catalog = new CardCatalog(cardDecks, rarityNames);
             stock = new ShopStock(shopCatalog, catalog, CardPackSheet.Load(), cardValue);
             if (shop != null) shop.Bind(stock, this);
 
@@ -531,17 +535,18 @@ namespace CozyTGC
         {
             // The deck is rolled per card, not per pack: a booster is mostly one deck
             // with the odd card from another mixed in, and how odd is the packWeight on
-            // each art set.
+            // each deck asset.
             int count = Mathf.Max(1, deck.CardCapacity);
             draws.Clear();
             for (int i = 0; i < count; i++)
             {
                 // The last slot is the one people wait for, so it never rolls common.
                 int floor = i == count - 1 ? Mathf.Clamp(guaranteedTier, 0, rarityMaterials.Count - 1) : 0;
-                var draw = RollCard(PickArtSet(), floor);
+                var draw = RollCard(PickDeck(), floor);
                 if (!draw.id.IsValid)
                 {
-                    Debug.LogError("[Cozy TGC] No card artwork loaded - check the art sets on PackOpeningController.");
+                    Debug.LogError("[Cozy TGC] No cards to deal - check the decks on PackOpeningController " +
+                                   "and the card assets under Assets/Cards.");
                     return;
                 }
                 draws.Add(draw);
@@ -560,19 +565,24 @@ namespace CozyTGC
         /// </summary>
         Texture2D PackBack()
         {
-            CardArtSet heaviest = null;
-            foreach (var set in artSets)
+            CardDeckData heaviest = null;
+            foreach (var set in cardDecks)
             {
-                if (set == null || set.Back == null) continue;
+                if (set == null || set.back == null) continue;
                 if (heaviest == null || set.packWeight > heaviest.packWeight) heaviest = set;
             }
-            return heaviest != null ? heaviest.Back : null;
+            return heaviest != null ? heaviest.back : null;
         }
 
         /// <summary>
         /// Rolls one card of one deck. Everything that mints a card goes through here,
         /// so a card bought off the shop's rack carries the same identity a pulled one
         /// does and can be sold back the same way.
+        ///
+        /// Three rolls, narrowing: which deck, which card of it, which finish it is
+        /// printed in. They are weighed in that order rather than over every card at
+        /// once so that a deck stays as rare as its packWeight says however many cards
+        /// are added to it.
         /// </summary>
         CardDraw RollCard(int setIndex, int minTier)
         {
@@ -581,59 +591,100 @@ namespace CozyTGC
             // one read as a perfectly good "first card of the first deck".
             if (set == null || set.FaceCount == 0) return new CardDraw { id = CardIdentity.None };
 
-            int face = Random.Range(0, set.FaceCount);
-            int tier = RollTier(minTier);
+            int face = PickFace(set);
+            var card = set.CardAt(face);
+            if (card == null) return new CardDraw { id = CardIdentity.None };
+
+            int tier = RollFinish(minTier);
             return new CardDraw
             {
                 id = new CardIdentity { set = setIndex, face = face, tier = tier },
-                face = set.Faces[face],
-                back = set.Back,
+                face = card.face,
+                back = set.back,
                 material = tier < rarityMaterials.Count ? rarityMaterials[tier] : null,
             };
         }
 
         /// <summary>
-        /// Which deck the next card comes off, by the art sets' pull weights - the same
+        /// Which deck the next card comes off, by the decks' pull weights - the same
         /// roll for a card in a pack and a card off the shop's rack, so the rare deck is
         /// as rare either way.
         /// </summary>
-        int PickArtSet()
+        int PickDeck()
         {
             float total = 0f;
-            foreach (var set in artSets)
+            foreach (var set in cardDecks)
                 if (set != null) total += Mathf.Max(0f, set.packWeight);
 
-            if (total <= 0f) return artSets.Count > 0 ? 0 : -1;
+            if (total <= 0f) return cardDecks.Count > 0 ? 0 : -1;
 
             float roll = Random.value * total;
-            for (int i = 0; i < artSets.Count; i++)
+            for (int i = 0; i < cardDecks.Count; i++)
             {
-                if (artSets[i] == null) continue;
-                roll -= Mathf.Max(0f, artSets[i].packWeight);
+                if (cardDecks[i] == null) continue;
+                roll -= Mathf.Max(0f, cardDecks[i].packWeight);
                 if (roll <= 0f) return i;
             }
-            return artSets.Count - 1;
+            return cardDecks.Count - 1;
         }
 
-        int RollTier(int minTier)
+        /// <summary>
+        /// Which card of a deck, by the weight on each card's own asset. A card at 0 is
+        /// never dealt - which is how a card is put in the album's pages without being
+        /// put in packs - so a deck of nothing but zeroes falls back to an even hand
+        /// rather than to nothing at all.
+        /// </summary>
+        static int PickFace(CardDeckData set)
+        {
+            float total = 0f;
+            for (int i = 0; i < set.FaceCount; i++) total += CardWeight(set, i);
+            if (total <= 0f) return Random.Range(0, set.FaceCount);
+
+            float roll = Random.value * total;
+            float carried = 0f;
+            for (int i = 0; i < set.FaceCount; i++)
+            {
+                float weight = CardWeight(set, i);
+                carried += weight;
+                if (weight > 0f && roll <= carried) return i;
+            }
+            return set.FaceCount - 1;
+        }
+
+        static float CardWeight(CardDeckData set, int face)
+        {
+            var card = set.CardAt(face);
+            return card != null ? Mathf.Max(0f, card.weight) : 0f;
+        }
+
+        /// <summary>
+        /// Which finish the card is printed in. Every finish is a fifth less likely than
+        /// the plain print before it - <see cref="CardFinishOdds"/> is the rule, and it
+        /// is the same for every card, so nothing here has to know which card was rolled.
+        ///
+        /// <paramref name="minTier"/> is the floor the last card of a pack rolls
+        /// against, which is what keeps a pack from finishing on a common.
+        /// </summary>
+        int RollFinish(int minTier)
         {
             int tiers = rarityMaterials.Count;
             if (tiers == 0) return 0;
 
+            minTier = Mathf.Clamp(minTier, 0, tiers - 1);
+
             float total = 0f;
-            for (int i = minTier; i < tiers; i++) total += Weight(i);
+            for (int i = minTier; i < tiers; i++) total += CardFinishOdds.Weight(i);
             if (total <= 0f) return minTier;
 
             float roll = Random.value * total;
+            float carried = 0f;
             for (int i = minTier; i < tiers; i++)
             {
-                roll -= Weight(i);
-                if (roll <= 0f) return i;
+                carried += CardFinishOdds.Weight(i);
+                if (roll <= carried) return i;
             }
             return tiers - 1;
         }
-
-        float Weight(int tier) => tier < rarityWeights.Count ? Mathf.Max(0f, rarityWeights[tier]) : 1f;
 
         void OnPackOpened()
         {
@@ -687,7 +738,9 @@ namespace CozyTGC
         /// <summary>
         /// Packs go into the drawer; cards are minted on the spot and flown onto the
         /// default pile, which is the same place a click on the stack sends them.
-        /// Nothing is charged for until it is known that it can be delivered.
+        /// Nothing is charged for until it is known that it can be delivered - which is
+        /// why a row naming a card that is in no deck here is refused rather than paid
+        /// for and quietly not handed over.
         /// </summary>
         public bool Buy(ShopOffer offer)
         {
@@ -702,12 +755,22 @@ namespace CozyTGC
             }
 
             var slot = board != null ? board.Default : null;
-            if (slot == null || cardPrefab == null || artSets.Count == 0) return false;
+            if (slot == null || cardPrefab == null || cardDecks.Count == 0) return false;
+
+            bool named = offer.goods == ShopGoods.NamedCard;
+            if (named && !catalog.Locate(offer.card, 0).IsValid)
+            {
+                Debug.LogWarning($"[Cozy TGC] Shop row \"{offer.title}\" names a card this scene " +
+                                 "has no deck for, so there is nothing to sell.");
+                return false;
+            }
 
             coins -= offer.price;
             for (int i = 0; i < offer.count; i++)
             {
-                var draw = RollCard(PickArtSet(), 0);
+                // Rolled fresh per copy either way: a named card still rolls its finish
+                // unless the row asked for one, so buying two is not buying two of a kind.
+                var draw = named ? DrawOf(offer.card, offer.finish) : RollCard(PickDeck(), 0);
                 if (!draw.id.IsValid) break;
 
                 // Face up, and wearing its own back: a bought card has already been
@@ -720,6 +783,31 @@ namespace CozyTGC
                 Deliver(slot, card, true);
             }
             return true;
+        }
+
+        /// <summary>
+        /// One copy of a named card, for a shop row that sells a particular one. The
+        /// finish is the row's if it asked for one and rolled the usual way if it did
+        /// not, so "the Ace of Coins, whatever finish it comes in" is a row that can be
+        /// written.
+        /// </summary>
+        CardDraw DrawOf(CardData card, CardFinish printing)
+        {
+            int tier = printing == CardFinish.Any
+                ? RollFinish(0)
+                : Mathf.Clamp((int)printing, 0, Mathf.Max(0, rarityMaterials.Count - 1));
+
+            var id = catalog.Locate(card, tier);
+            if (!id.IsValid) return new CardDraw { id = CardIdentity.None };
+
+            var set = catalog.Set(id.set);
+            return new CardDraw
+            {
+                id = id,
+                face = card.face,
+                back = set != null ? set.back : null,
+                material = tier < rarityMaterials.Count ? rarityMaterials[tier] : null,
+            };
         }
 
         /// <summary>
@@ -1163,7 +1251,11 @@ namespace CozyTGC
             GUILayout.Label($"In pack: {(deck != null ? deck.Remaining : 0)}" +
                             $"   Sorted: {(board != null ? board.TotalCards : 0)}", UiSkin.Label);
             GUILayout.Label(AlbumLine(), UiSkin.Label);
-            if (lastCard.IsValid) GUILayout.Label($"Last card: {catalog.FullNameOf(lastCard)}", UiSkin.Label);
+            // The price is off the card's own asset, so this is also the readout that
+            // says whether a card has been priced at all.
+            if (lastCard.IsValid)
+                GUILayout.Label($"Last card: {catalog.FullNameOf(lastCard)}   {catalog.PriceOf(lastCard)} c",
+                                UiSkin.Label);
             GUILayout.Label("Space / R: pack   Q: unpack it all   B: shop\nC: clear slots   H: hide",
                             UiSkin.Detail);
             GUILayout.EndArea();
@@ -1278,7 +1370,7 @@ namespace CozyTGC
                                CardPackDeck packDeck, CardSlotBoard slotBoard,
                                List<CardAlbum> cardAlbums, AlbumShelf albumShelf, float albumPlane,
                                Transform rig, Vector3 sealedOffset,
-                               List<CardArtSet> sets, List<Material> materials, List<string> names)
+                               List<CardDeckData> decks, List<Material> materials, List<string> names)
         {
             cam = camera;
             interactor = cardInteractor;
@@ -1290,7 +1382,7 @@ namespace CozyTGC
             albumDepth = albumPlane;
             packRig = rig;
             sealedRigOffset = sealedOffset;
-            artSets = sets;
+            cardDecks = decks;
             rarityMaterials = materials;
             rarityNames = names;
         }

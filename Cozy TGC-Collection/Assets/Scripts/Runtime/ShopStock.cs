@@ -30,10 +30,22 @@ namespace CozyTGC
         BoosterPacks,
         /// <summary>Rolled on the spot and dealt onto the default pile, face up.</summary>
         RandomCards,
+        /// <summary>One named card off <see cref="ShopOffer.card"/>, dealt the same way.</summary>
+        NamedCard,
     }
 
     /// <summary>
     /// One row on the buy shelf, as authored on a <see cref="ShopCatalog"/>.
+    ///
+    /// A row selling one particular card is written by dropping the card's own
+    /// <see cref="CardData"/> asset into <see cref="card"/> and setting
+    /// <see cref="goods"/> to <see cref="ShopGoods.NamedCard"/>. There is nothing to
+    /// pick for the picture: the row draws what it is selling.
+    ///
+    /// Such a row names the finish too, and starts on Common rather than Any - a card
+    /// on a shelf is a particular copy of a particular card, price and all. Any still
+    /// works and is kept for later, for a row that sells a known card at an unknown
+    /// print.
     /// </summary>
     [Serializable]
     public class ShopOffer
@@ -44,32 +56,46 @@ namespace CozyTGC
         public ShopGoods goods = ShopGoods.BoosterPacks;
         [Tooltip("How many of them one purchase delivers.")]
         public int count = 1;
-        [Tooltip("Leave empty and the row shows a wrapper off the pack sheet, or the " +
-                 "back of a card, whichever it is selling.")]
-        public Texture2D preview;
 
-        /// <summary>Resolved when the shelf is stocked; never written to the asset.</summary>
+        [Tooltip("The card asset this row sells. Only read when goods is NamedCard, and " +
+                 "the row is dead without one.")]
+        public CardData card;
+        [Tooltip("What finish it is printed in. A row selling a named card is meant to " +
+                 "name the print as well - you are buying a particular card off a shelf, " +
+                 "not opening it. Any is left in for later: it rolls the finish the way " +
+                 "a pack would, for a row that sells a known card at an unknown print.")]
+        public CardFinish finish = CardFinish.Common;
+
+        /// <summary>Worked out when the shelf is stocked; never written to the asset.</summary>
         [NonSerialized] public ShopIcon icon;
     }
 
     /// <summary>
-    /// One line of a wanted ad: cards of a kind, and how many of them. -1 means "any"
-    /// on set, face and suit, so a want can be as loose as "five cards, shiny or
-    /// better" or as tight as "the Judgement, in holo".
+    /// One line of a wanted ad: cards of a kind, and how many of them.
+    ///
+    /// A line about one particular card is written by dropping that card's own
+    /// <see cref="CardData"/> asset into <see cref="card"/>. That is the whole of
+    /// which card it is, which is why there is no face number here any more - a card
+    /// is picked, not counted to.
+    ///
+    /// <see cref="deck"/> and <see cref="suit"/> are what is left for the lines that
+    /// deliberately do *not* name a card: "any three cards of the Spanish deck",
+    /// "three swords in shiny". Any and -1 mean the line does not care, so a want can
+    /// be as loose as "five cards" or as tight as "the Judgement, in holo".
     ///
     /// A class rather than a struct so that a line added in the inspector starts on
-    /// those -1s. Zeroes would quietly mean "the first card of the first deck".
+    /// those -1s. Zeroes would quietly mean "the first suit of the first deck".
     /// </summary>
     [Serializable]
     public class CardWant
     {
-        [Tooltip("Which deck the card has to come from.")]
+        [Tooltip("The exact card wanted, as its own asset. Set, and the deck and suit " +
+                 "below stop applying - only the finish still does.")]
+        public CardData card;
+
+        [Tooltip("Which deck the card has to come from, for a line that does not name one.")]
         public CardDeck deck = CardDeck.Any;
-        [Tooltip("Which face of that deck. Tarot 0-21 are the files 00-21, so 20 is the " +
-                 "Judgement; the Spanish deck is 0-39, suit * 10 + rank. -1 for any face.")]
-        public int face = -1;
-        [Tooltip("0 Oros, 1 Copas, 2 Espadas, 3 Bastos. -1 for any suit. Only used when " +
-                 "the face is left at -1.")]
+        [Tooltip("0 coins, 1 cups, 2 swords, 3 wands. -1 for any suit.")]
         public int suit = -1;
         [Tooltip("Exactly this finish - a collector after a holo does not want the galaxy " +
                  "one either. Any, for a card in whatever finish it turns up in.")]
@@ -81,9 +107,14 @@ namespace CozyTGC
         public bool Matches(CardIdentity id, CardCatalog catalog)
         {
             if (!id.IsValid) return false;
-            if (deck != CardDeck.Any && id.set != (int)deck) return false;
-            if (face >= 0 && id.face != face) return false;
             if (finish != CardFinish.Any && id.tier != (int)finish) return false;
+
+            // A named card answers the whole question of which card this is, deck and
+            // suit included, so neither is asked as well. The finish is a different
+            // question and still stands.
+            if (card != null) return catalog != null && catalog.Card(id) == card;
+
+            if (deck != CardDeck.Any && id.set != (int)deck) return false;
             if (suit < 0) return true;
 
             var set = catalog?.Set(id.set);
@@ -102,11 +133,9 @@ namespace CozyTGC
         public string title = "Wanted";
         [TextArea(2, 3)] public string detail;
         public int price = 100;
-        [Tooltip("Leave empty and the row shows the card the first line names.")]
-        public Texture2D preview;
         public List<CardWant> wants = new List<CardWant>();
 
-        /// <summary>Resolved when the ad goes on the board; never written to the asset.</summary>
+        /// <summary>Worked out when the ad goes on the board; never written to the asset.</summary>
         [NonSerialized] public ShopIcon icon;
 
         /// <summary>How many cards the ad is asking for in total.</summary>
@@ -141,7 +170,11 @@ namespace CozyTGC
         readonly List<WantedAd> wanted = new List<WantedAd>();
         readonly Texture packSheet;
 
-        /// <summary>What one card is worth, which every rolled ad's payout is a multiple of.</summary>
+        /// <summary>
+        /// What a card is worth when its own asset does not say - the payout of a rolled
+        /// ad is a multiple of the price on the cards it names, and of this for the ads
+        /// that name none.
+        /// </summary>
         readonly int cardValue;
 
         public IReadOnlyList<ShopOffer> Offers => offers;
@@ -171,41 +204,58 @@ namespace CozyTGC
             RefillBoard();
         }
 
+        /// <summary>
+        /// A row draws what it is selling, and nothing says what that is except the row
+        /// itself - which is why there is no picture to pick on an offer. A wrapper for
+        /// packs, the card's own face where the row names one, and the back of a card
+        /// for the ones sold unseen, because that is exactly what is being bought.
+        /// </summary>
         ShopIcon IconFor(ShopOffer offer)
         {
-            if (offer.preview != null) return ShopIcon.Whole(offer.preview);
             if (offer.goods == ShopGoods.BoosterPacks)
                 return ShopIcon.Cell(packSheet, CardPackSheet.UvRect(packSheet, CardPackSheet.RandomIndex()));
 
-            // The back of the first deck: a card bought unseen is exactly that, so the
-            // shop is selling the back of a card rather than the front.
+            if (offer.goods == ShopGoods.NamedCard && offer.card != null)
+                return ShopIcon.Whole(offer.card.face);
+
             var deck = catalog?.Set(0);
-            return ShopIcon.Whole(deck != null ? deck.Back : null);
+            return ShopIcon.Whole(deck != null ? deck.back : null);
         }
 
         /// <summary>
-        /// The card an ad is about, so a hand written ad does not have to name its own
-        /// picture: the first line that asks for a particular card is the one shown.
+        /// The same for an ad, which shows the card it is about: the first line that
+        /// names one, or the first card of a suit for a line asking by suit. An ad that
+        /// wants anything at all has nothing better to show than the back of a card.
         /// </summary>
         ShopIcon IconFor(WantedAd ad)
         {
-            if (ad.preview != null) return ShopIcon.Whole(ad.preview);
-
             foreach (var want in ad.wants)
             {
-                if (want == null || want.deck == CardDeck.Any) continue;
+                if (want == null) continue;
+                if (want.card != null) return ShopIcon.Whole(want.card.face);
+                if (want.deck == CardDeck.Any) continue;
 
                 var deck = catalog?.Set((int)want.deck);
                 if (deck == null) continue;
 
-                int face = want.face >= 0 ? want.face
-                         : want.suit >= 0 ? deck.FaceOf(want.suit, 0)
-                         : -1;
+                int face = want.suit >= 0 ? deck.FaceOf(want.suit, 0) : -1;
                 if (face >= 0) return ShopIcon.Whole(deck.FaceAt(face));
             }
 
             var first = catalog?.Set(0);
-            return ShopIcon.Whole(first != null ? first.Back : null);
+            return ShopIcon.Whole(first != null ? first.back : null);
+        }
+
+        /// <summary>
+        /// What a collector starts from for one named card: the price typed on the
+        /// card's own asset, or the flat <see cref="cardValue"/> for a card that has
+        /// none. Every rolled ad's payout is worked out from this and then multiplied
+        /// by how hard it is to fill.
+        /// </summary>
+        int PriceOf(CardDeckData deck, int face)
+        {
+            var card = deck != null ? deck.CardAt(face) : null;
+            return card != null && card.price > 0 ? card.price : cardValue;
         }
 
         // -------------------------------------------------------------------
@@ -300,13 +350,16 @@ namespace CozyTGC
                     ? $"Wanted: the {name} from the {deck.Name}, and it has to be the " +
                       $"{finish.ToLowerInvariant()} one."
                     : $"Wanted: the {name} from the {deck.Name}. Any finish will do.",
-                price = Mathf.RoundToInt(cardValue * 5f * (1f + 2f * tier)),
+                // Five times what the card is worth, and more again for a finish that
+                // has to be waited for. A dear card is a dear ad.
+                price = Mathf.RoundToInt(PriceOf(deck, face) * 5f * (1f + 2f * tier)),
             };
-            // The cast carries the art set's index straight through, named or not.
+            // The card asset itself, the same way a hand written ad names one - so a
+            // rolled ad and an authored one are the same thing by the time they are on
+            // the board.
             ad.wants.Add(new CardWant
             {
-                deck = (CardDeck)setIndex,
-                face = face,
+                card = deck.CardAt(face),
                 finish = withFinish ? (CardFinish)tier : CardFinish.Any,
                 count = 1,
             });
@@ -325,15 +378,20 @@ namespace CozyTGC
             {
                 title = $"The {rankName} of every suit",
                 detail = $"Wanted: the {rankName} from all {deck.Suits} suits of the {deck.Name}. Any finish.",
-                price = Mathf.RoundToInt(cardValue * deck.Suits * 5f),
             };
 
+            // Priced off the cards it actually names rather than off a card count, so a
+            // rank whose four cards are dear pays like it.
+            int worth = 0;
             for (int suit = 0; suit < deck.Suits; suit++)
             {
                 int face = deck.FaceOf(suit, rank);
                 if (face < 0) continue;
-                ad.wants.Add(new CardWant { deck = (CardDeck)setIndex, face = face, count = 1 });
+                worth += PriceOf(deck, face);
+                ad.wants.Add(new CardWant { card = deck.CardAt(face), count = 1 });
             }
+
+            ad.price = Mathf.RoundToInt(worth * 5f);
             return ad;
         }
 
@@ -349,15 +407,20 @@ namespace CozyTGC
             {
                 title = $"Complete set: {suitName}",
                 detail = $"Wanted: every one of the {deck.suitSize} {suitName} cards. Pays for the lot.",
-                price = Mathf.RoundToInt(cardValue * deck.suitSize * 4f),
             };
 
+            int worth = 0;
             for (int rank = 0; rank < deck.suitSize; rank++)
             {
                 int face = deck.FaceOf(suit, rank);
                 if (face < 0) continue;
-                ad.wants.Add(new CardWant { deck = (CardDeck)setIndex, face = face, count = 1 });
+                worth += PriceOf(deck, face);
+                ad.wants.Add(new CardWant { card = deck.CardAt(face), count = 1 });
             }
+
+            // A shade under the rank ad's rate per card: ten of one suit is a longer
+            // wait, but it is one deck's worth of luck rather than four suits' worth.
+            ad.price = Mathf.RoundToInt(worth * 4f);
             return ad;
         }
 

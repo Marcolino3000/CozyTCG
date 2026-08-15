@@ -1,0 +1,75 @@
+%YAML 1.1
+%TAG !u! tag:unity3d.com,2011:
+--- !u!114 &11400000
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 0}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: e93e23b0e3e3e47b5a2ee86b777a64ed, type: 3}
+  m_Name: Spanish deck
+  m_EditorClassIdentifier: Assembly-CSharp::CozyTGC.CardDeckData
+  displayName: Spanish deck
+  back: {fileID: 2800000, guid: 65f6adbb35b9e4ba59e2c47c8104075a, type: 3}
+  packWeight: 9
+  suitSize: 10
+  suitNames:
+  - Coins
+  - Cups
+  - Swords
+  - Wands
+  rankNames:
+  - Ace
+  - 2
+  - 3
+  - 4
+  - 5
+  - 6
+  - 7
+  - Jack
+  - Knight
+  - King
+  cards:
+  - {fileID: 11400000, guid: c873cfa9f9b17466898efdccec234e2e, type: 2}
+  - {fileID: 11400000, guid: 6ac435c7286344bed8a613b7d00a979f, type: 2}
+  - {fileID: 11400000, guid: 4ef40f0e1c5b349eab6b34bae85d0b8f, type: 2}
+  - {fileID: 11400000, guid: ef2c9954d74244319b97d6ed8b1c5532, type: 2}
+  - {fileID: 11400000, guid: f25ca0bf3fcc7411fb267bf735b36262, type: 2}
+  - {fileID: 11400000, guid: 51243cc2643884bee95abf7d6d5e2b64, type: 2}
+  - {fileID: 11400000, guid: 64cc5d97577314af799fdb60024c397b, type: 2}
+  - {fileID: 11400000, guid: d7c6d8f077de54e2fa07d6c4c3d7c866, type: 2}
+  - {fileID: 11400000, guid: a836005717bd44ccdbc24ff7566f36af, type: 2}
+  - {fileID: 11400000, guid: 873de6b8497974535b5928139528a124, type: 2}
+  - {fileID: 11400000, guid: db18e67e4199a4d848e32bf4ec62dcca, type: 2}
+  - {fileID: 11400000, guid: d30fa478f2cb0485c89ab923f9443b20, type: 2}
+  - {fileID: 11400000, guid: 9c6e308044af947938c4e7846f9ed7aa, type: 2}
+  - {fileID: 11400000, guid: 179f5397b02754f02ba639173a07fd98, type: 2}
+  - {fileID: 11400000, guid: 1fe0c2e269b434c1e880131ec3c1aa0f, type: 2}
+  - {fileID: 11400000, guid: bf99ba631772345e591ef97815363e5d, type: 2}
+  - {fileID: 11400000, guid: 398d1bd44ccde46a695b30eae049bed4, type: 2}
+  - {fileID: 11400000, guid: 20b0283c91e394474b2ce1ba10d59850, type: 2}
+  - {fileID: 11400000, guid: bca25a0957b1547d3873881e60e11edb, type: 2}
+  - {fileID: 11400000, guid: 254d1b4456f184f129c12cf1a6f9b8f3, type: 2}
+  - {fileID: 11400000, guid: d4ab18bc9e989479293b53c4f2cfa868, type: 2}
+  - {fileID: 11400000, guid: 7f46f5e24d9d74f2391c737b369c1c47, type: 2}
+  - {fileID: 11400000, guid: 55bf7af0a83604878a348ac5895ad9e0, type: 2}
+  - {fileID: 11400000, guid: 9228cc1fb948d4974ac566221f4f8478, type: 2}
+  - {fileID: 11400000, guid: 2710206dd7bfd4b119756c72ccdb776b, type: 2}
+  - {fileID: 11400000, guid: 4c371205757a74a738b8297269501006, type: 2}
+  - {fileID: 11400000, guid: 4aaf6ffa4cb27400ba09a2754d257bce, type: 2}
+  - {fileID: 11400000, guid: d5fc582a1cd4b4fdb8bca99302d187bb, type: 2}
+  - {fileID: 11400000, guid: c49a26eee6c0e403d87254e8a6d3f8be, type: 2}
+  - {fileID: 11400000, guid: 55e9b24955588472a8eb5ad750fdfe95, type: 2}
+  - {fileID: 11400000, guid: 4fa1b51d187744f819d38daf52064979, type: 2}
+  - {fileID: 11400000, guid: 840ea2e3a30394a63b1032c68e11db3f, type: 2}
+  - {fileID: 11400000, guid: f90d8d973cb664609b6b0f20afba38d7, type: 2}
+  - {fileID: 11400000, guid: db2dcab6d7a5d4bed9c6df92ed5d5aaa, type: 2}
+  - {fileID: 11400000, guid: de07f522c5b064380a07d0867bac9ddd, type: 2}
+  - {fileID: 11400000, guid: 11e4c84a3fa7d4aeaa2cad87b688df6b, type: 2}
+  - {fileID: 11400000, guid: 6dcb29b119ca649f7924f5481e1e1933, type: 2}
+  - {fileID: 11400000, guid: cdf8b2916561d43a199853344b46a99d, type: 2}
+  - {fileID: 11400000, guid: 2b2ba63da3f27445f8c5ad59ee0d4a08, type: 2}
+  - {fileID: 11400000, guid: ea709452c26e3413d96ee2c0b9dbb3ed, type: 2}

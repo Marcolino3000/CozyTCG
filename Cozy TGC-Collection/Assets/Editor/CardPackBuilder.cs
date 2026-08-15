@@ -32,11 +32,6 @@ namespace CozyTGC.EditorTools
         /// <summary>An album sheet used to be a dark panel of its own. The book art draws
         /// them now, so the material it needed is cleaned up rather than left to rot.</summary>
         const string StaleAlbumPageMaterialPath = "Assets/Materials/AlbumPage.mat";
-        /// <summary>
-        /// Authored content, so it is made once and never overwritten - the same deal
-        /// Assets/Dialogs gets. Everything else this builder touches is regenerated.
-        /// </summary>
-        const string ShopCatalogPath = "Assets/Shop/ShopCatalog.asset";
         const string PrefabPath = "Assets/Prefabs/CardPack.prefab";
         const string SlotPrefabPath = "Assets/Prefabs/CardSlot.prefab";
         const string CardPrefabPath = "Assets/Prefabs/Card.prefab";
@@ -147,29 +142,9 @@ namespace CozyTGC.EditorTools
         static readonly Vector2 TrayPackSize = new Vector2(0.28f, 0.51f);
         const float TrayFrameScale = 1.1f;
 
-        /// <summary>Ordering the shop's wanted ads read the artwork by.
-        /// The tarot folder is 00-21, the majors in Rider-Waite order, so 08 is
-        /// Strength and 11 is Justice - and 20 is the Judgement the ads ask for.</summary>
-        static readonly string[] TarotNames =
-        {
-            "The Fool", "The Magician", "The High Priestess", "The Empress", "The Emperor",
-            "The Hierophant", "The Lovers", "The Chariot", "Strength", "The Hermit",
-            "Wheel of Fortune", "Justice", "The Hanged Man", "Death", "Temperance",
-            "The Devil", "The Tower", "The Star", "The Moon", "The Sun",
-            "Judgement", "The World",
-        };
-
-        /// <summary>The Spanish folder is 1-40 sorted numerically: four suits of ten,
-        /// in this order, each running 1-7 and then the three court cards.</summary>
-        static readonly string[] SpanishSuits = { "Oros", "Copas", "Espadas", "Bastos" };
-        static readonly string[] SpanishRanks =
-            { "1", "2", "3", "4", "5", "6", "7", "Sota", "Caballo", "Rey" };
-        const int SpanishSuitSize = 10;
-
-        // A tenth of the cards in a pack, which at five cards a pack is one tarot card
-        // every second pack.
-        const float TarotPackWeight = 1f;
-        const float SpanishPackWeight = 9f;
+        // What the decks hold and what their cards are called lives on the card assets
+        // now - see CardAssetBuilder, which makes them, and Assets/Cards, which is where
+        // a card's price and pull weight are typed in.
 
         // The camera never moves. It sits where the row of piles and a full stack both
         // fit, and the pack rig does the travelling instead: while the wrapper is sealed
@@ -813,60 +788,6 @@ namespace CozyTGC.EditorTools
             return tray;
         }
 
-        /// <summary>
-        /// The shop's shelves. Authored content: made with the shipped defaults the
-        /// first time, and left alone from then on, so editing the asset survives every
-        /// later rebuild of the scene. Reset it from the inspector to get the defaults
-        /// back, or delete it and build again.
-        /// </summary>
-        static ShopCatalog LoadOrCreateShopCatalog()
-        {
-            var catalog = AssetDatabase.LoadAssetAtPath<ShopCatalog>(ShopCatalogPath);
-            if (catalog != null) return catalog;
-
-            EnsureFolder(Path.GetDirectoryName(ShopCatalogPath)?.Replace('\\', '/'));
-            catalog = ScriptableObject.CreateInstance<ShopCatalog>();
-            catalog.FillWithDefaults();
-            AssetDatabase.CreateAsset(catalog, ShopCatalogPath);
-            Debug.Log($"[Cozy TGC] Created {ShopCatalogPath} - edit the shop's shelves there.");
-            return catalog;
-        }
-
-        /// <summary>
-        /// The two decks, and what their cards are called. The names are wired here
-        /// rather than read off the files because they are not in them - the folders
-        /// are numbered - and the shop's wanted ads are written in card names.
-        ///
-        /// A pack rolls its deck per card from the weights below, so it is mostly
-        /// Spanish with the occasional tarot card in it: 1 against 9 is a tenth of the
-        /// cards, and at <see cref="CardsPerPack"/> cards a pack that is one tarot card
-        /// every second pack. The order here is what <see cref="CardDeck"/> names.
-        /// </summary>
-        static List<CardArtSet> BuildArtSets()
-        {
-            return new List<CardArtSet>
-            {
-                new CardArtSet
-                {
-                    resourceFolder = CardArtLibrary.Root + "tarot_free - monochrome",
-                    backName = "back",
-                    displayName = "tarot",
-                    cardNames = TarotNames,
-                    packWeight = TarotPackWeight,
-                },
-                new CardArtSet
-                {
-                    resourceFolder = CardArtLibrary.Root + "spanish deck",
-                    backName = "back",
-                    displayName = "Spanish deck",
-                    suitSize = SpanishSuitSize,
-                    suitNames = SpanishSuits,
-                    rankNames = SpanishRanks,
-                    packWeight = SpanishPackWeight,
-                },
-            };
-        }
-
         static void BuildScene(GameObject packPrefab, GameObject slotPrefab, GameObject cardPrefab,
                                Mesh unitQuad, Material pocketMaterial,
                                Material traySlotMaterial, Material trayPackMaterial,
@@ -947,7 +868,10 @@ namespace CozyTGC.EditorTools
             var shelf = BuildShelf(unitQuad, iconMaterials);
             var tray = BuildTray(unitQuad, traySlotMaterial, trayPackMaterial);
 
-            var artSets = BuildArtSets();
+            // Made if they are not there yet, and left alone if they are: the cards are
+            // authored assets, priced and weighted by hand, so this scene is built
+            // against them rather than the other way round.
+            var decks = CardAssetBuilder.LoadOrCreateDecks();
 
             var materials = new List<Material>();
             var names = new List<string>();
@@ -972,9 +896,9 @@ namespace CozyTGC.EditorTools
             controller.EditorBind(cam, camGO.GetComponent<CardInteractor>(), pack, deck,
                                   boardGO.GetComponent<CardSlotBoard>(), albums, shelf, AlbumPosition.z,
                                   rigGO.transform, SealedRigOffset,
-                                  artSets, materials, names);
+                                  decks, materials, names);
             controller.EditorBindShop(cardPrefab, tray, controllerGO.GetComponent<ShopView>(),
-                                      LoadOrCreateShopCatalog());
+                                      ShopCatalogBuilder.LoadOrCreate());
 
             var dialogLink = controllerGO.GetComponent<SceneLinkButton>();
             dialogLink.EditorBind(DialogSceneName, "Talk");

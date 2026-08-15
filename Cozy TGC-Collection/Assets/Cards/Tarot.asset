@@ -1,0 +1,43 @@
+%YAML 1.1
+%TAG !u! tag:unity3d.com,2011:
+--- !u!114 &11400000
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 0}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: e93e23b0e3e3e47b5a2ee86b777a64ed, type: 3}
+  m_Name: Tarot
+  m_EditorClassIdentifier: Assembly-CSharp::CozyTGC.CardDeckData
+  displayName: tarot
+  back: {fileID: 2800000, guid: fda1b95344dc34953b6235c776e9150b, type: 3}
+  packWeight: 1
+  suitSize: 0
+  suitNames: []
+  rankNames: []
+  cards:
+  - {fileID: 11400000, guid: f139bfe50b24d428bab799ccda131dee, type: 2}
+  - {fileID: 11400000, guid: e25a54fa129534a92972493a1fd473c3, type: 2}
+  - {fileID: 11400000, guid: 9913ae74978c24e4791f4be06985de86, type: 2}
+  - {fileID: 11400000, guid: 6f48505493c7146e488423a6ad46daed, type: 2}
+  - {fileID: 11400000, guid: 4af0c8f6eaea74b3188b30e37750fffc, type: 2}
+  - {fileID: 11400000, guid: 5fabbe04fe28e49eeb9e46e291ae4686, type: 2}
+  - {fileID: 11400000, guid: d9b83557ee4bc4d80b0c2b78ff8e9077, type: 2}
+  - {fileID: 11400000, guid: 484ac02050b134183bd4e6d0117cf35a, type: 2}
+  - {fileID: 11400000, guid: 798ab30943dcd4caea8bddbb58698c42, type: 2}
+  - {fileID: 11400000, guid: f4d0f7e9e772c42fd8e045ab9c9c15a5, type: 2}
+  - {fileID: 11400000, guid: edec347c36fe342f9b0c709f918f5345, type: 2}
+  - {fileID: 11400000, guid: 8cf1c6e841640400ca40eecdd67dff01, type: 2}
+  - {fileID: 11400000, guid: f564579c5189348a9b7fb200a17e2917, type: 2}
+  - {fileID: 11400000, guid: d0d844817f73549598d884cf2b201b74, type: 2}
+  - {fileID: 11400000, guid: 538f8097b6f72480fbed1f689b9b572e, type: 2}
+  - {fileID: 11400000, guid: a1abbca3b6b514d78a823c86dbf7cf24, type: 2}
+  - {fileID: 11400000, guid: cb757f644a85649bcb7a1678e560e2fe, type: 2}
+  - {fileID: 11400000, guid: 54c35f522d8eb440199aba6fc6692747, type: 2}
+  - {fileID: 11400000, guid: 3e2ec728868c44c64b218a06892f78bf, type: 2}
+  - {fileID: 11400000, guid: 379b0c5ae8a4c40869b93dd0eb1259ee, type: 2}
+  - {fileID: 11400000, guid: ce4d86de2556b4ce6a3fe0254404bf85, type: 2}
+  - {fileID: 11400000, guid: fa126db6ec21b4e3092c9239c66a179d, type: 2}
