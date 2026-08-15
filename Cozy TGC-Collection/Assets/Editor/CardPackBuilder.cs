@@ -42,6 +42,8 @@ namespace CozyTGC.EditorTools
         const string CardPrefabPath = "Assets/Prefabs/Card.prefab";
         const string CardMeshPath = "Assets/Meshes/CardQuad.asset";
         const string ScenePath = "Assets/Scenes/PackOpening.unity";
+        /// <summary>Where the corner button goes. Built by <see cref="DialogSceneBuilder"/>.</summary>
+        const string DialogSceneName = "DialogDemo";
 
         const float PixelsPerUnit = 100f;
 
@@ -961,9 +963,11 @@ namespace CozyTGC.EditorTools
                 names.Add(tier);
             }
 
-            // The shop panel draws itself in OnGUI and reaches the scene only through
-            // the controller, so it needs nothing but a place to live.
-            var controllerGO = new GameObject("PackOpening", typeof(PackOpeningController), typeof(ShopView));
+            // The shop panel and the dialog button both draw themselves in OnGUI and
+            // reach the scene only through the controller, so they need nothing but a
+            // place to live.
+            var controllerGO = new GameObject("PackOpening", typeof(PackOpeningController),
+                                              typeof(ShopView), typeof(SceneLinkButton));
             var controller = controllerGO.GetComponent<PackOpeningController>();
             controller.EditorBind(cam, camGO.GetComponent<CardInteractor>(), pack, deck,
                                   boardGO.GetComponent<CardSlotBoard>(), albums, shelf, AlbumPosition.z,
@@ -971,6 +975,10 @@ namespace CozyTGC.EditorTools
                                   artSets, materials, names);
             controller.EditorBindShop(cardPrefab, tray, controllerGO.GetComponent<ShopView>(),
                                       LoadOrCreateShopCatalog());
+
+            var dialogLink = controllerGO.GetComponent<SceneLinkButton>();
+            dialogLink.EditorBind(DialogSceneName, "Talk");
+            controller.EditorBindDialogLink(dialogLink);
 
             EditorSceneManager.MarkSceneDirty(scene);
             EditorSceneManager.SaveScene(scene, ScenePath);

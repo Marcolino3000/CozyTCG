@@ -263,7 +263,7 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: 1c098250d7fe142768c1d64b54196e34, type: 3}
   m_Name: 
   m_EditorClassIdentifier: Assembly-CSharp::CozyTGC.DialogSession
-  tree: {fileID: 11400000, guid: 8d732ba5da7ec4708899f4c1ad469149, type: 2}
+  tree: {fileID: 11400000, guid: a0c2ef6255b764d2a8571587f362f11f, type: 2}
   playOnStart: 1
 --- !u!114 &3174219583437291431
 MonoBehaviour:

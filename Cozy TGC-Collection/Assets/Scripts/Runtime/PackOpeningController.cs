@@ -46,6 +46,8 @@ namespace CozyTGC
         [Tooltip("The drawer of unopened packs, under the shelf.")]
         [SerializeField] PackTray tray;
         [SerializeField] ShopView shop;
+        [Tooltip("The button in the bottom right corner that leaves for the dialog scene.")]
+        [SerializeField] SceneLinkButton dialogLink;
         [Tooltip("What a bought card is made from. The booster stack is bound to the same " +
                  "prefab separately - a card off the shelf and a card out of a pack have to " +
                  "be the same object, or one of them cannot be filed, dragged or sold.")]
@@ -314,6 +316,10 @@ namespace CozyTGC
             bool open = shop != null && shop.IsOpen;
             if (open && !shopWasOpen) StowPack();
             shopWasOpen = open;
+
+            // The panel is modal and dims the frame; the way out of the scene goes with
+            // the table under it rather than sitting on top of the dimming.
+            if (dialogLink != null) dialogLink.SetVisible(!open);
         }
 
         /// <summary>
@@ -786,7 +792,8 @@ namespace CozyTGC
             // under it. IMGUI swallows the click that lands on one of its buttons,
             // but nothing tells the world about the one that lands beside it - so
             // the world is told here, and the cards are taken out of reach as well.
-            bool onPanel = shop != null && shop.Blocks(pointer);
+            bool onPanel = (shop != null && shop.Blocks(pointer)) ||
+                           (dialogLink != null && dialogLink.Blocks(pointer));
             if (interactor != null) interactor.SetBlocked(onPanel);
             if (onPanel)
             {
@@ -1139,8 +1146,8 @@ namespace CozyTGC
             if (!showHud) return;
 
             // No album buttons here: the shelf of books down the left is the menu,
-            // and it stays on screen when the HUD is hidden - as does the shop's own
-            // tab in the opposite corner.
+            // and it stays on screen when the HUD is hidden - as do the shop's own
+            // tab in the opposite corner and the dialog button under it.
             GUILayout.BeginArea(new Rect(12, 12, 320, 232), GUI.skin.box);
             GUILayout.Label("Cozy TGC - Pack Opening", titleStyle);
             GUILayout.Label(Hint());
@@ -1282,6 +1289,8 @@ namespace CozyTGC
             shop = shopPanel;
             shopCatalog = catalogAsset;
         }
+
+        public void EditorBindDialogLink(SceneLinkButton link) => dialogLink = link;
 #endif
     }
 }
