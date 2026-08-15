@@ -1,0 +1,252 @@
+%YAML 1.1
+%TAG !u! tag:unity3d.com,2011:
+--- !u!114 &-5133172571344552017
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 0}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 2818dd0c5b404dfe8aedaf83b49ab7b1, type: 3}
+  m_Name: Oh, du sammelst die a...
+  m_EditorClassIdentifier: cod.dialogbuilder::Nodes.Decorator.NpcDialogOption
+  Guid: d136744167aa84973acafa556bb96621
+  Position: {x: 0, y: 0}
+  customPreview: 0
+  Blackboard:
+    CharacterData: {fileID: 11400000, guid: 8e6934520d2cc4737beb5a2a66bd9e3b, type: 2}
+  DialogLine: Oh, du sammelst die auch?
+  DialogLineEn: Oh, you collect these too?
+  TextPreview: Oh, du sammelst die a...
+  AudioClip: {fileID: 0}
+  ClipVolume: 1
+  PauseAfter: 0.5
+  Children:
+  - {fileID: 1619295954897846410}
+  - {fileID: -4662617254140587245}
+  - {fileID: 4118876704660738359}
+  FallThrough: 0
+  IsAvailable: 1
+  IsTrustOption: 0
+  IsBondingOption: 0
+  RequiredNodes: []
+  BlockerNodes: []
+  PopularityValue: 0
+--- !u!114 &-4662617254140587245
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 0}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 9c0bd1f85e094e118b634ba4dd916b80, type: 3}
+  m_Name: Nur wegen der Bilder,...
+  m_EditorClassIdentifier: cod.dialogbuilder::Nodes.Decorator.PlayerDialogOption
+  Guid: 23bfa4b8dfbbe4cbfa4cda32386fb50a
+  Position: {x: 360, y: 0}
+  customPreview: 0
+  Blackboard:
+    CharacterData: {fileID: 11400000, guid: 8e6934520d2cc4737beb5a2a66bd9e3b, type: 2}
+  DialogLine: Nur wegen der Bilder, ehrlich gesagt.
+  DialogLineEn: Just for the artwork, honestly.
+  TextPreview: Nur wegen der Bilder,...
+  AudioClip: {fileID: 0}
+  ClipVolume: 1
+  PauseAfter: 0.5
+  Children:
+  - {fileID: -2352323254600807064}
+  FallThrough: 0
+  IsAvailable: 1
+  IsTrustOption: 0
+  IsBondingOption: 0
+  RequiredNodes: []
+  BlockerNodes: []
+  answerType: 0
+  _popularityModifier: 0
+--- !u!114 &-3009812323775112812
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 0}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 2818dd0c5b404dfe8aedaf83b49ab7b1, type: 3}
+  m_Name: Na dann viel Spass be...
+  m_EditorClassIdentifier: cod.dialogbuilder::Nodes.Decorator.NpcDialogOption
+  Guid: be8ef66e006104275888c154b294a0ef
+  Position: {x: 760, y: 160}
+  customPreview: 0
+  Blackboard:
+    CharacterData: {fileID: 11400000, guid: 8e6934520d2cc4737beb5a2a66bd9e3b, type: 2}
+  DialogLine: Na dann viel Spass beim Zuschauen.
+  DialogLineEn: Enjoy watching, then.
+  TextPreview: Na dann viel Spass be...
+  AudioClip: {fileID: 0}
+  ClipVolume: 1
+  PauseAfter: 0.5
+  Children: []
+  FallThrough: 0
+  IsAvailable: 1
+  IsTrustOption: 0
+  IsBondingOption: 0
+  RequiredNodes: []
+  BlockerNodes: []
+  PopularityValue: 0
+--- !u!114 &-2352323254600807064
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 0}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 2818dd0c5b404dfe8aedaf83b49ab7b1, type: 3}
+  m_Name: Auch ein guter Grund.
+  m_EditorClassIdentifier: cod.dialogbuilder::Nodes.Decorator.NpcDialogOption
+  Guid: 8238908c9b63444dd905a211d97b4a3b
+  Position: {x: 760, y: 0}
+  customPreview: 0
+  Blackboard:
+    CharacterData: {fileID: 11400000, guid: 8e6934520d2cc4737beb5a2a66bd9e3b, type: 2}
+  DialogLine: Auch ein guter Grund.
+  DialogLineEn: That is a good enough reason.
+  TextPreview: Auch ein guter Grund.
+  AudioClip: {fileID: 0}
+  ClipVolume: 1
+  PauseAfter: 0.5
+  Children: []
+  FallThrough: 0
+  IsAvailable: 1
+  IsTrustOption: 0
+  IsBondingOption: 0
+  RequiredNodes: []
+  BlockerNodes: []
+  PopularityValue: 0
+--- !u!114 &11400000
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 0}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 8e86e6013fb5415d9fc88ab06a37cd42, type: 3}
+  m_Name: SampleConversation
+  m_EditorClassIdentifier: cod.dialogbuilder::Tree.DialogTree
+  StartNodes:
+  - {fileID: -5133172571344552017}
+  nodes:
+  - {fileID: -5133172571344552017}
+  - {fileID: 1619295954897846410}
+  - {fileID: -4662617254140587245}
+  - {fileID: 4118876704660738359}
+  - {fileID: 1075594980067833396}
+  - {fileID: -2352323254600807064}
+  - {fileID: -3009812323775112812}
+  Blackboard:
+    CharacterData: {fileID: 11400000, guid: 8e6934520d2cc4737beb5a2a66bd9e3b, type: 2}
+--- !u!114 &1075594980067833396
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 0}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 2818dd0c5b404dfe8aedaf83b49ab7b1, type: 3}
+  m_Name: Dann zeig mir mal dei...
+  m_EditorClassIdentifier: cod.dialogbuilder::Nodes.Decorator.NpcDialogOption
+  Guid: 41188aac0174845f1b392b96035f1bd5
+  Position: {x: 760, y: -160}
+  customPreview: 0
+  Blackboard:
+    CharacterData: {fileID: 11400000, guid: 8e6934520d2cc4737beb5a2a66bd9e3b, type: 2}
+  DialogLine: Dann zeig mir mal deine schoenste.
+  DialogLineEn: Then show me your finest one.
+  TextPreview: Dann zeig mir mal dei...
+  AudioClip: {fileID: 0}
+  ClipVolume: 1
+  PauseAfter: 0.5
+  Children: []
+  FallThrough: 0
+  IsAvailable: 1
+  IsTrustOption: 0
+  IsBondingOption: 0
+  RequiredNodes: []
+  BlockerNodes: []
+  PopularityValue: 0
+--- !u!114 &1619295954897846410
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 0}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 9c0bd1f85e094e118b634ba4dd916b80, type: 3}
+  m_Name: Seit ich klein bin. D...
+  m_EditorClassIdentifier: cod.dialogbuilder::Nodes.Decorator.PlayerDialogOption
+  Guid: 53c46f6dc4e0e4b7d8bf1a303e30881b
+  Position: {x: 360, y: -160}
+  customPreview: 0
+  Blackboard:
+    CharacterData: {fileID: 11400000, guid: 8e6934520d2cc4737beb5a2a66bd9e3b, type: 2}
+  DialogLine: Seit ich klein bin. Die Sonderdrucke haben es mir angetan.
+  DialogLineEn: Since I was little. The special prints got me hooked.
+  TextPreview: Seit ich klein bin. D...
+  AudioClip: {fileID: 0}
+  ClipVolume: 1
+  PauseAfter: 0.5
+  Children:
+  - {fileID: 1075594980067833396}
+  FallThrough: 0
+  IsAvailable: 1
+  IsTrustOption: 0
+  IsBondingOption: 0
+  RequiredNodes: []
+  BlockerNodes: []
+  answerType: 1
+  _popularityModifier: 5
+--- !u!114 &4118876704660738359
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 0}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 9c0bd1f85e094e118b634ba4dd916b80, type: 3}
+  m_Name: Karten sind doch was ...
+  m_EditorClassIdentifier: cod.dialogbuilder::Nodes.Decorator.PlayerDialogOption
+  Guid: 40c0452b358984f62bdfd57a5e4373db
+  Position: {x: 360, y: 160}
+  customPreview: 0
+  Blackboard:
+    CharacterData: {fileID: 11400000, guid: 8e6934520d2cc4737beb5a2a66bd9e3b, type: 2}
+  DialogLine: Karten sind doch was fuer Kinder.
+  DialogLineEn: Cards are for kids, though.
+  TextPreview: Karten sind doch was ...
+  AudioClip: {fileID: 0}
+  ClipVolume: 1
+  PauseAfter: 0.5
+  Children:
+  - {fileID: -3009812323775112812}
+  FallThrough: 0
+  IsAvailable: 1
+  IsTrustOption: 0
+  IsBondingOption: 0
+  RequiredNodes: []
+  BlockerNodes: []
+  answerType: 2
+  _popularityModifier: -5

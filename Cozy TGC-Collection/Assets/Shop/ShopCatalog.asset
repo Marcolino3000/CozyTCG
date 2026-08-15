@@ -1,0 +1,331 @@
+%YAML 1.1
+%TAG !u! tag:unity3d.com,2011:
+--- !u!114 &11400000
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 0}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: bb4b526564f9c4137b60a36c9c44c567, type: 3}
+  m_Name: ShopCatalog
+  m_EditorClassIdentifier: Assembly-CSharp::CozyTGC.ShopCatalog
+  offers:
+  - title: Booster pack
+    detail: A sealed pack. Five cards, and the last one is never common.
+    price: 100
+    goods: 0
+    count: 1
+    preview: {fileID: 0}
+  - title: Booster packs x3
+    detail: Three sealed packs, a tenth off the single price.
+    price: 270
+    goods: 0
+    count: 3
+    preview: {fileID: 0}
+  - title: Half a box
+    detail: Five packs. An afternoon's opening, at a fair discount.
+    price: 440
+    goods: 0
+    count: 5
+    preview: {fileID: 0}
+  - title: A box of ten
+    detail: Ten packs at once. The cheapest wrappers in the shop.
+    price: 850
+    goods: 0
+    count: 10
+    preview: {fileID: 0}
+  - title: Random card
+    detail: One loose card off the rack. Deck and finish unseen.
+    price: 30
+    goods: 1
+    count: 1
+    preview: {fileID: 0}
+  - title: Random cards x5
+    detail: Five loose cards, dealt straight onto the default pile.
+    price: 130
+    goods: 1
+    count: 5
+    preview: {fileID: 0}
+  - title: Random cards x10
+    detail: Ten off the rack. Filling a suit the slow, certain way.
+    price: 250
+    goods: 1
+    count: 10
+    preview: {fileID: 0}
+  - title: A handful
+    detail: Twenty in one go. Good odds on something that glitters.
+    price: 480
+    goods: 1
+    count: 20
+    preview: {fileID: 0}
+  ads:
+  - title: looking for holo judement card!!
+    detail: '!!1!1!'
+    price: 750
+    preview: {fileID: 0}
+    wants:
+    - deck: -1
+      face: 20
+      suit: -1
+      finish: -1
+      count: 1
+  - title: The Tower
+    detail: 'Wanted: the Tower from the tarot. Any finish, it is for a friend.'
+    price: 150
+    preview: {fileID: 0}
+    wants:
+    - deck: -1
+      face: 16
+      suit: -1
+      finish: -1
+      count: 1
+  - title: Two of the Fool
+    detail: 'Wanted: two Fools. One to keep, one to trade on.'
+    price: 260
+    preview: {fileID: 0}
+    wants:
+    - deck: -1
+      face: 0
+      suit: -1
+      finish: -1
+      count: 2
+  - title: The Sun and the Moon
+    detail: 'Wanted: the pair of them, and they must be the pair.'
+    price: 340
+    preview: {fileID: 0}
+    wants:
+    - deck: -1
+      face: 19
+      suit: -1
+      finish: -1
+      count: 1
+    - deck: -1
+      face: 18
+      suit: -1
+      finish: -1
+      count: 1
+  - title: The Rey de Bastos
+    detail: 'Wanted: the king of clubs, Spanish style. Any finish.'
+    price: 180
+    preview: {fileID: 0}
+    wants:
+    - deck: -1
+      face: 39
+      suit: -1
+      finish: -1
+      count: 1
+  - title: The 4 of every suit
+    detail: 'Wanted: the 4 from all four suits of the Spanish deck. Any finish.'
+    price: 600
+    preview: {fileID: 0}
+    wants:
+    - deck: -1
+      face: 3
+      suit: -1
+      finish: -1
+      count: 1
+    - deck: -1
+      face: 13
+      suit: -1
+      finish: -1
+      count: 1
+    - deck: -1
+      face: 23
+      suit: -1
+      finish: -1
+      count: 1
+    - deck: -1
+      face: 33
+      suit: -1
+      finish: -1
+      count: 1
+  - title: The Rey of every suit
+    detail: 'Wanted: all four kings. Oros, Copas, Espadas, Bastos.'
+    price: 700
+    preview: {fileID: 0}
+    wants:
+    - deck: -1
+      face: 9
+      suit: -1
+      finish: -1
+      count: 1
+    - deck: -1
+      face: 19
+      suit: -1
+      finish: -1
+      count: 1
+    - deck: -1
+      face: 29
+      suit: -1
+      finish: -1
+      count: 1
+    - deck: -1
+      face: 39
+      suit: -1
+      finish: -1
+      count: 1
+  - title: 'Complete set: Copas'
+    detail: 'Wanted: every one of the ten Copas. Pays for the lot.'
+    price: 1200
+    preview: {fileID: 0}
+    wants:
+    - deck: -1
+      face: 10
+      suit: -1
+      finish: -1
+      count: 1
+    - deck: -1
+      face: 11
+      suit: -1
+      finish: -1
+      count: 1
+    - deck: -1
+      face: 12
+      suit: -1
+      finish: -1
+      count: 1
+    - deck: -1
+      face: 13
+      suit: -1
+      finish: -1
+      count: 1
+    - deck: -1
+      face: 14
+      suit: -1
+      finish: -1
+      count: 1
+    - deck: -1
+      face: 15
+      suit: -1
+      finish: -1
+      count: 1
+    - deck: -1
+      face: 16
+      suit: -1
+      finish: -1
+      count: 1
+    - deck: -1
+      face: 17
+      suit: -1
+      finish: -1
+      count: 1
+    - deck: -1
+      face: 18
+      suit: -1
+      finish: -1
+      count: 1
+    - deck: -1
+      face: 19
+      suit: -1
+      finish: -1
+      count: 1
+  - title: 'Complete set: Oros'
+    detail: 'Wanted: all ten Oros, 1 through Rey. Pays for the lot.'
+    price: 1200
+    preview: {fileID: 0}
+    wants:
+    - deck: -1
+      face: 0
+      suit: -1
+      finish: -1
+      count: 1
+    - deck: -1
+      face: 1
+      suit: -1
+      finish: -1
+      count: 1
+    - deck: -1
+      face: 2
+      suit: -1
+      finish: -1
+      count: 1
+    - deck: -1
+      face: 3
+      suit: -1
+      finish: -1
+      count: 1
+    - deck: -1
+      face: 4
+      suit: -1
+      finish: -1
+      count: 1
+    - deck: -1
+      face: 5
+      suit: -1
+      finish: -1
+      count: 1
+    - deck: -1
+      face: 6
+      suit: -1
+      finish: -1
+      count: 1
+    - deck: -1
+      face: 7
+      suit: -1
+      finish: -1
+      count: 1
+    - deck: -1
+      face: 8
+      suit: -1
+      finish: -1
+      count: 1
+    - deck: -1
+      face: 9
+      suit: -1
+      finish: -1
+      count: 1
+  - title: Three shiny Espadas
+    detail: 'Wanted: three swords with some shine on them. Which ones is your business.'
+    price: 420
+    preview: {fileID: 0}
+    wants:
+    - deck: -1
+      face: -1
+      suit: 2
+      finish: -1
+      count: 3
+  - title: Three tarot cards
+    detail: 'Wanted: any three of the majors. A reading, not a collection.'
+    price: 200
+    preview: {fileID: 0}
+    wants:
+    - deck: -1
+      face: -1
+      suit: -1
+      finish: -1
+      count: 3
+  - title: Three cards in holo
+    detail: 'Wanted: any three cards, holo or better. Deck does not matter.'
+    price: 400
+    preview: {fileID: 0}
+    wants:
+    - deck: -1
+      face: -1
+      suit: -1
+      finish: -1
+      count: 3
+  - title: Five cards in shiny
+    detail: 'Wanted: any five cards with a bit of shine on them.'
+    price: 300
+    preview: {fileID: 0}
+    wants:
+    - deck: -1
+      face: -1
+      suit: -1
+      finish: -1
+      count: 5
+  - title: Eight cards, any at all
+    detail: 'Wanted: eight cards. No, really - any eight. Clearing a gap in a folder.'
+    price: 240
+    preview: {fileID: 0}
+    wants:
+    - deck: -1
+      face: -1
+      suit: -1
+      finish: -1
+      count: 8
+  adsOnBoard: 6
+  topUpWithRolledAds: 1

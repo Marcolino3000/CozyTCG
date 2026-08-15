@@ -1,0 +1,87 @@
+%YAML 1.1
+%TAG !u! tag:unity3d.com,2011:
+--- !u!21 &2100000
+Material:
+  serializedVersion: 8
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_Name: Card_Shiny
+  m_Shader: {fileID: 4800000, guid: 4feef6035fd584b7c9442f9ea81908a5, type: 3}
+  m_Parent: {fileID: 0}
+  m_ModifiedSerializedProperties: 0
+  m_ValidKeywords:
+  - _HOLOPIXELATE
+  - _PIXELAA
+  m_InvalidKeywords: []
+  m_LightmapFlags: 4
+  m_EnableInstancingVariants: 0
+  m_DoubleSidedGI: 0
+  m_CustomRenderQueue: -1
+  stringTagMap: {}
+  disabledShaderPasses: []
+  m_LockedProperties: 
+  m_SavedProperties:
+    serializedVersion: 3
+    m_TexEnvs:
+    - _BackTex:
+        m_Texture: {fileID: 2800000, guid: fda1b95344dc34953b6235c776e9150b, type: 3}
+        m_Scale: {x: 1, y: 1}
+        m_Offset: {x: 0, y: 0}
+    - _FrontTex:
+        m_Texture: {fileID: 2800000, guid: 59252a1fb2b8540a28fa781201d6c5cd, type: 3}
+        m_Scale: {x: 1, y: 1}
+        m_Offset: {x: 0, y: 0}
+    - _MaskTex:
+        m_Texture: {fileID: 0}
+        m_Scale: {x: 1, y: 1}
+        m_Offset: {x: 0, y: 0}
+    m_Ints: []
+    m_Floats:
+    - _ChromeSharp: 48
+    - _ChromeStrength: 0
+    - _ColorSteps: 0
+    - _Cutoff: 0.5
+    - _FoilBlend: 0.65
+    - _FoilIntensity: 1
+    - _FresnelPower: 4
+    - _FresnelStrength: 0.2
+    - _HoloPixelate: 1
+    - _MaskBias: 0.1
+    - _MaskContrast: 2
+    - _MaskFromLuma: 0.45
+    - _PixelAA: 1
+    - _RainbowAngle: 1.1
+    - _RainbowDepth: 0.06
+    - _RainbowDrift: 0.03
+    - _RainbowSat: 1
+    - _RainbowScale: 3
+    - _RainbowSteps: 8
+    - _RainbowStrength: 0.1
+    - _RainbowTilt: 1.2
+    - _SparkleDensity: 26
+    - _SparkleDepth: 0.03
+    - _SparkleSeed: 3
+    - _SparkleSize: 0.35
+    - _SparkleSpread: 1.2
+    - _SparkleStrength: 0
+    - _SweepAngle: 1.1
+    - _SweepOffset: -0.4
+    - _SweepStrength: 0.4
+    - _SweepTravel: 0.9
+    - _SweepWidth: 0.22
+    - _TiltGain: 1
+    - _UseMaskTex: 0
+    m_Colors:
+    - _CardPixels: {r: 73, g: 113, b: 0, a: 0}
+    - _ChromeGround: {r: 0.11999995, g: 0.089999996, b: 0.17999998, a: 1}
+    - _ChromeSky: {r: 0.54999995, g: 0.75, b: 1, a: 1}
+    - _ChromeSun: {r: 1, g: 0.95, b: 0.85, a: 1}
+    - _ChromeSunDir: {r: 0.4, g: 0.8, b: -0.45, a: 0}
+    - _FresnelColor: {r: 0.8, g: 0.9, b: 1, a: 1}
+    - _SparkleColor: {r: 1, g: 1, b: 1, a: 1}
+    - _SweepColor: {r: 1, g: 1, b: 1, a: 1}
+    - _Tint: {r: 1, g: 1, b: 1, a: 1}
+  m_BuildTextureStacks: []
+  m_AllowLocking: 1

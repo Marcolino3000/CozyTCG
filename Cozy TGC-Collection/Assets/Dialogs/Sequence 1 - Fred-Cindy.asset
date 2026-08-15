@@ -1,0 +1,323 @@
+%YAML 1.1
+%TAG !u! tag:unity3d.com,2011:
+--- !u!114 &-4662617254140587245
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 0}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 9c0bd1f85e094e118b634ba4dd916b80, type: 3}
+  m_Name: Hey
+  m_EditorClassIdentifier: cod.dialogbuilder::Nodes.Decorator.PlayerDialogOption
+  Guid: 23bfa4b8dfbbe4cbfa4cda32386fb50a
+  Position: {x: 121.30421, y: -209.60876}
+  customPreview: 0
+  Blackboard:
+    CharacterData: {fileID: 11400000, guid: 8e6934520d2cc4737beb5a2a66bd9e3b, type: 2}
+  DialogLine: Hey
+  DialogLineEn: Just for the artwork, honestly.
+  TextPreview: Hey
+  AudioClip: {fileID: 0}
+  ClipVolume: 1
+  PauseAfter: 0.5
+  Children:
+  - {fileID: -2352323254600807064}
+  FallThrough: 0
+  IsAvailable: 1
+  IsTrustOption: 0
+  IsBondingOption: 0
+  RequiredNodes: []
+  BlockerNodes: []
+  answerType: 0
+  _popularityModifier: 0
+--- !u!114 &-2352323254600807064
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 0}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 2818dd0c5b404dfe8aedaf83b49ab7b1, type: 3}
+  m_Name: ...
+  m_EditorClassIdentifier: cod.dialogbuilder::Nodes.Decorator.NpcDialogOption
+  Guid: 8238908c9b63444dd905a211d97b4a3b
+  Position: {x: 413, y: 55.57141}
+  customPreview: 0
+  Blackboard:
+    CharacterData: {fileID: 11400000, guid: 8e6934520d2cc4737beb5a2a66bd9e3b, type: 2}
+  DialogLine: ...
+  DialogLineEn: That is a good enough reason.
+  TextPreview: ...
+  AudioClip: {fileID: 0}
+  ClipVolume: 1
+  PauseAfter: 0.5
+  Children:
+  - {fileID: 648283070625801059}
+  - {fileID: 1805115201682121558}
+  - {fileID: 1291494676369329136}
+  FallThrough: 0
+  IsAvailable: 1
+  IsTrustOption: 0
+  IsBondingOption: 0
+  RequiredNodes: []
+  BlockerNodes: []
+  PopularityValue: 0
+--- !u!114 &11400000
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 0}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 8e86e6013fb5415d9fc88ab06a37cd42, type: 3}
+  m_Name: Sequence 1 - Fred-Cindy
+  m_EditorClassIdentifier: cod.dialogbuilder::Tree.DialogTree
+  StartNodes:
+  - {fileID: -4662617254140587245}
+  - {fileID: 4118876704660738359}
+  - {fileID: 1619295954897846410}
+  nodes:
+  - {fileID: 1619295954897846410}
+  - {fileID: -4662617254140587245}
+  - {fileID: 4118876704660738359}
+  - {fileID: -2352323254600807064}
+  - {fileID: 648283070625801059}
+  - {fileID: 1805115201682121558}
+  - {fileID: 1291494676369329136}
+  - {fileID: 5560493770819235459}
+  - {fileID: 6846698777644423598}
+  Blackboard:
+    CharacterData: {fileID: 11400000, guid: 8e6934520d2cc4737beb5a2a66bd9e3b, type: 2}
+--- !u!114 &648283070625801059
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 0}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 9c0bd1f85e094e118b634ba4dd916b80, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: cod.dialogbuilder::Nodes.Decorator.PlayerDialogOption
+  Guid: 147a8214ae4c24f068af41f2f69b09e7
+  Position: {x: 120.99997, y: 227.38925}
+  customPreview: 0
+  Blackboard:
+    CharacterData: {fileID: 11400000, guid: 8e6934520d2cc4737beb5a2a66bd9e3b, type: 2}
+  DialogLine: Hey
+  DialogLineEn: 
+  TextPreview: Hey
+  AudioClip: {fileID: 0}
+  ClipVolume: 1
+  PauseAfter: 0.5
+  Children: []
+  FallThrough: 0
+  IsAvailable: 1
+  IsTrustOption: 0
+  IsBondingOption: 0
+  RequiredNodes: []
+  BlockerNodes: []
+  answerType: 0
+  _popularityModifier: 0
+--- !u!114 &1291494676369329136
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 0}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 9c0bd1f85e094e118b634ba4dd916b80, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: cod.dialogbuilder::Nodes.Decorator.PlayerDialogOption
+  Guid: 12233e7f763b5485490d5ab23636f81f
+  Position: {x: 710, y: 227.00003}
+  customPreview: 0
+  Blackboard:
+    CharacterData: {fileID: 11400000, guid: 8e6934520d2cc4737beb5a2a66bd9e3b, type: 2}
+  DialogLine: '*Poke*'
+  DialogLineEn: 
+  TextPreview: '*Poke*'
+  AudioClip: {fileID: 0}
+  ClipVolume: 1
+  PauseAfter: 0.5
+  Children: []
+  FallThrough: 0
+  IsAvailable: 1
+  IsTrustOption: 0
+  IsBondingOption: 0
+  RequiredNodes: []
+  BlockerNodes: []
+  answerType: 0
+  _popularityModifier: 0
+--- !u!114 &1619295954897846410
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 0}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 9c0bd1f85e094e118b634ba4dd916b80, type: 3}
+  m_Name: '*Poke*'
+  m_EditorClassIdentifier: cod.dialogbuilder::Nodes.Decorator.PlayerDialogOption
+  Guid: 53c46f6dc4e0e4b7d8bf1a303e30881b
+  Position: {x: 710.3042, y: -209.60876}
+  customPreview: 0
+  Blackboard:
+    CharacterData: {fileID: 11400000, guid: 8e6934520d2cc4737beb5a2a66bd9e3b, type: 2}
+  DialogLine: '*Poke*'
+  DialogLineEn: Since I was little. The special prints got me hooked.
+  TextPreview: '*Poke*'
+  AudioClip: {fileID: 0}
+  ClipVolume: 1
+  PauseAfter: 0.5
+  Children:
+  - {fileID: -2352323254600807064}
+  FallThrough: 0
+  IsAvailable: 1
+  IsTrustOption: 0
+  IsBondingOption: 0
+  RequiredNodes: []
+  BlockerNodes: []
+  answerType: 1
+  _popularityModifier: 5
+--- !u!114 &1805115201682121558
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 0}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 9c0bd1f85e094e118b634ba4dd916b80, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: cod.dialogbuilder::Nodes.Decorator.PlayerDialogOption
+  Guid: 523b5955aa77e475fae5621f9ee02f21
+  Position: {x: 412.9999, y: 227.00003}
+  customPreview: 0
+  Blackboard:
+    CharacterData: {fileID: 11400000, guid: 8e6934520d2cc4737beb5a2a66bd9e3b, type: 2}
+  DialogLine: Cindy
+  DialogLineEn: 
+  TextPreview: Cindy
+  AudioClip: {fileID: 0}
+  ClipVolume: 1
+  PauseAfter: 0.5
+  Children: []
+  FallThrough: 0
+  IsAvailable: 1
+  IsTrustOption: 0
+  IsBondingOption: 0
+  RequiredNodes: []
+  BlockerNodes: []
+  answerType: 0
+  _popularityModifier: 0
+--- !u!114 &4118876704660738359
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 0}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 9c0bd1f85e094e118b634ba4dd916b80, type: 3}
+  m_Name: Cindy
+  m_EditorClassIdentifier: cod.dialogbuilder::Nodes.Decorator.PlayerDialogOption
+  Guid: 40c0452b358984f62bdfd57a5e4373db
+  Position: {x: 416.3042, y: -209.60876}
+  customPreview: 0
+  Blackboard:
+    CharacterData: {fileID: 11400000, guid: 8e6934520d2cc4737beb5a2a66bd9e3b, type: 2}
+  DialogLine: Cindy
+  DialogLineEn: Cards are for kids, though.
+  TextPreview: Cindy
+  AudioClip: {fileID: 0}
+  ClipVolume: 1
+  PauseAfter: 0.5
+  Children:
+  - {fileID: -2352323254600807064}
+  FallThrough: 0
+  IsAvailable: 1
+  IsTrustOption: 0
+  IsBondingOption: 0
+  RequiredNodes: []
+  BlockerNodes: []
+  answerType: 2
+  _popularityModifier: -5
+--- !u!114 &5560493770819235459
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 0}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 2818dd0c5b404dfe8aedaf83b49ab7b1, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: cod.dialogbuilder::Nodes.Decorator.NpcDialogOption
+  Guid: eb58777b642b64857aa11216b1a4eef4
+  Position: {x: 415.99982, y: 434.8252}
+  customPreview: 0
+  Blackboard:
+    CharacterData: {fileID: 11400000, guid: 8e6934520d2cc4737beb5a2a66bd9e3b, type: 2}
+  DialogLine: WHAT???
+  DialogLineEn: 
+  TextPreview: WHAT???
+  AudioClip: {fileID: 0}
+  ClipVolume: 1
+  PauseAfter: 0.5
+  Children: []
+  FallThrough: 0
+  IsAvailable: 1
+  IsTrustOption: 0
+  IsBondingOption: 0
+  RequiredNodes: []
+  BlockerNodes: []
+  PopularityValue: 0
+--- !u!114 &6846698777644423598
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 0}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 9c0bd1f85e094e118b634ba4dd916b80, type: 3}
+  m_Name: You promised me ...
+  m_EditorClassIdentifier: cod.dialogbuilder::Nodes.Decorator.PlayerDialogOption
+  Guid: a178b495a786948079388065fa15d517
+  Position: {x: 412.9999, y: 626.0419}
+  customPreview: 0
+  Blackboard:
+    CharacterData: {fileID: 11400000, guid: 8e6934520d2cc4737beb5a2a66bd9e3b, type: 2}
+  DialogLine: You promised me to get me a FLUFFLES booster pack for my birthday,
+    remember?
+  DialogLineEn: 
+  TextPreview: You promised me ...
+  AudioClip: {fileID: 0}
+  ClipVolume: 1
+  PauseAfter: 0.5
+  Children: []
+  FallThrough: 0
+  IsAvailable: 1
+  IsTrustOption: 0
+  IsBondingOption: 0
+  RequiredNodes: []
+  BlockerNodes: []
+  answerType: 0
+  _popularityModifier: 0

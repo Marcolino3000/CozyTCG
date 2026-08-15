@@ -1,0 +1,458 @@
+%YAML 1.1
+%TAG !u! tag:unity3d.com,2011:
+--- !u!114 &11400000
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 0}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 370bf8051b1d43e5a8307c533b808e26, type: 3}
+  m_Name: DialogMarkers
+  m_EditorClassIdentifier: com.audioplayer::MarkerManager
+  serializationData:
+    SerializedFormat: 2
+    SerializedBytes: 
+    ReferencedUnityObjects: []
+    SerializedBytesString: 
+    Prefab: {fileID: 0}
+    PrefabModificationsReferencedUnityObjects: []
+    PrefabModifications: []
+    SerializationNodes:
+    - Name: CharacterExpressions
+      Entry: 7
+      Data: 0|System.Collections.Generic.Dictionary`2[[System.String, mscorlib],[System.Collections.Generic.List`1[[MarkerManager+Expression,
+        com.audioplayer]], mscorlib]], mscorlib
+    - Name: comparer
+      Entry: 7
+      Data: 1|System.Collections.Generic.GenericEqualityComparer`1[[System.String,
+        mscorlib]], mscorlib
+    - Name: 
+      Entry: 8
+      Data: 
+    - Name: 
+      Entry: 12
+      Data: 3
+    - Name: 
+      Entry: 7
+      Data: 
+    - Name: $k
+      Entry: 1
+      Data: Marlene
+    - Name: $v
+      Entry: 7
+      Data: 2|System.Collections.Generic.List`1[[MarkerManager+Expression, com.audioplayer]],
+        mscorlib
+    - Name: 
+      Entry: 12
+      Data: 11
+    - Name: 
+      Entry: 7
+      Data: 3|MarkerManager+Expression, com.audioplayer
+    - Name: Name
+      Entry: 1
+      Data: Paragraph
+    - Name: State
+      Entry: 3
+      Data: 0
+    - Name: 
+      Entry: 8
+      Data: 
+    - Name: 
+      Entry: 7
+      Data: 4|MarkerManager+Expression, com.audioplayer
+    - Name: Name
+      Entry: 1
+      Data: neutral
+    - Name: State
+      Entry: 3
+      Data: 1
+    - Name: 
+      Entry: 8
+      Data: 
+    - Name: 
+      Entry: 7
+      Data: 5|MarkerManager+Expression, com.audioplayer
+    - Name: Name
+      Entry: 1
+      Data: angry
+    - Name: State
+      Entry: 3
+      Data: 2
+    - Name: 
+      Entry: 8
+      Data: 
+    - Name: 
+      Entry: 7
+      Data: 6|MarkerManager+Expression, com.audioplayer
+    - Name: Name
+      Entry: 1
+      Data: annoyed
+    - Name: State
+      Entry: 3
+      Data: 3
+    - Name: 
+      Entry: 8
+      Data: 
+    - Name: 
+      Entry: 7
+      Data: 7|MarkerManager+Expression, com.audioplayer
+    - Name: Name
+      Entry: 1
+      Data: happy
+    - Name: State
+      Entry: 3
+      Data: 4
+    - Name: 
+      Entry: 8
+      Data: 
+    - Name: 
+      Entry: 7
+      Data: 8|MarkerManager+Expression, com.audioplayer
+    - Name: Name
+      Entry: 1
+      Data: moved
+    - Name: State
+      Entry: 3
+      Data: 5
+    - Name: 
+      Entry: 8
+      Data: 
+    - Name: 
+      Entry: 7
+      Data: 9|MarkerManager+Expression, com.audioplayer
+    - Name: Name
+      Entry: 1
+      Data: sad
+    - Name: State
+      Entry: 3
+      Data: 6
+    - Name: 
+      Entry: 8
+      Data: 
+    - Name: 
+      Entry: 7
+      Data: 10|MarkerManager+Expression, com.audioplayer
+    - Name: Name
+      Entry: 1
+      Data: sarcasm
+    - Name: State
+      Entry: 3
+      Data: 7
+    - Name: 
+      Entry: 8
+      Data: 
+    - Name: 
+      Entry: 7
+      Data: 11|MarkerManager+Expression, com.audioplayer
+    - Name: Name
+      Entry: 1
+      Data: skeptical
+    - Name: State
+      Entry: 3
+      Data: 8
+    - Name: 
+      Entry: 8
+      Data: 
+    - Name: 
+      Entry: 7
+      Data: 12|MarkerManager+Expression, com.audioplayer
+    - Name: Name
+      Entry: 1
+      Data: smirky
+    - Name: State
+      Entry: 3
+      Data: 9
+    - Name: 
+      Entry: 8
+      Data: 
+    - Name: 
+      Entry: 7
+      Data: 13|MarkerManager+Expression, com.audioplayer
+    - Name: Name
+      Entry: 1
+      Data: thoughtful
+    - Name: State
+      Entry: 3
+      Data: 10
+    - Name: 
+      Entry: 8
+      Data: 
+    - Name: 
+      Entry: 13
+      Data: 
+    - Name: 
+      Entry: 8
+      Data: 
+    - Name: 
+      Entry: 8
+      Data: 
+    - Name: 
+      Entry: 7
+      Data: 
+    - Name: $k
+      Entry: 1
+      Data: Hilde
+    - Name: $v
+      Entry: 7
+      Data: 14|System.Collections.Generic.List`1[[MarkerManager+Expression, com.audioplayer]],
+        mscorlib
+    - Name: 
+      Entry: 12
+      Data: 8
+    - Name: 
+      Entry: 7
+      Data: 15|MarkerManager+Expression, com.audioplayer
+    - Name: Name
+      Entry: 1
+      Data: Neutral
+    - Name: State
+      Entry: 3
+      Data: 1
+    - Name: 
+      Entry: 8
+      Data: 
+    - Name: 
+      Entry: 7
+      Data: 16|MarkerManager+Expression, com.audioplayer
+    - Name: Name
+      Entry: 1
+      Data: critical
+    - Name: State
+      Entry: 3
+      Data: 2
+    - Name: 
+      Entry: 8
+      Data: 
+    - Name: 
+      Entry: 7
+      Data: 17|MarkerManager+Expression, com.audioplayer
+    - Name: Name
+      Entry: 1
+      Data: curious
+    - Name: State
+      Entry: 3
+      Data: 3
+    - Name: 
+      Entry: 8
+      Data: 
+    - Name: 
+      Entry: 7
+      Data: 18|MarkerManager+Expression, com.audioplayer
+    - Name: Name
+      Entry: 1
+      Data: laughing
+    - Name: State
+      Entry: 3
+      Data: 4
+    - Name: 
+      Entry: 8
+      Data: 
+    - Name: 
+      Entry: 7
+      Data: 19|MarkerManager+Expression, com.audioplayer
+    - Name: Name
+      Entry: 1
+      Data: sad
+    - Name: State
+      Entry: 3
+      Data: 5
+    - Name: 
+      Entry: 8
+      Data: 
+    - Name: 
+      Entry: 7
+      Data: 20|MarkerManager+Expression, com.audioplayer
+    - Name: Name
+      Entry: 1
+      Data: sigh
+    - Name: State
+      Entry: 3
+      Data: 6
+    - Name: 
+      Entry: 8
+      Data: 
+    - Name: 
+      Entry: 7
+      Data: 21|MarkerManager+Expression, com.audioplayer
+    - Name: Name
+      Entry: 1
+      Data: smile
+    - Name: State
+      Entry: 3
+      Data: 7
+    - Name: 
+      Entry: 8
+      Data: 
+    - Name: 
+      Entry: 7
+      Data: 22|MarkerManager+Expression, com.audioplayer
+    - Name: Name
+      Entry: 1
+      Data: sartled
+    - Name: State
+      Entry: 3
+      Data: 8
+    - Name: 
+      Entry: 8
+      Data: 
+    - Name: 
+      Entry: 13
+      Data: 
+    - Name: 
+      Entry: 8
+      Data: 
+    - Name: 
+      Entry: 8
+      Data: 
+    - Name: 
+      Entry: 7
+      Data: 
+    - Name: $k
+      Entry: 1
+      Data: Paul
+    - Name: $v
+      Entry: 7
+      Data: 23|System.Collections.Generic.List`1[[MarkerManager+Expression, com.audioplayer]],
+        mscorlib
+    - Name: 
+      Entry: 12
+      Data: 8
+    - Name: 
+      Entry: 7
+      Data: 24|MarkerManager+Expression, com.audioplayer
+    - Name: Name
+      Entry: 1
+      Data: Neutral
+    - Name: State
+      Entry: 3
+      Data: 1
+    - Name: 
+      Entry: 8
+      Data: 
+    - Name: 
+      Entry: 7
+      Data: 25|MarkerManager+Expression, com.audioplayer
+    - Name: Name
+      Entry: 1
+      Data: angry
+    - Name: State
+      Entry: 3
+      Data: 2
+    - Name: 
+      Entry: 8
+      Data: 
+    - Name: 
+      Entry: 7
+      Data: 26|MarkerManager+Expression, com.audioplayer
+    - Name: Name
+      Entry: 1
+      Data: awkward
+    - Name: State
+      Entry: 3
+      Data: 3
+    - Name: 
+      Entry: 8
+      Data: 
+    - Name: 
+      Entry: 7
+      Data: 27|MarkerManager+Expression, com.audioplayer
+    - Name: Name
+      Entry: 1
+      Data: critical
+    - Name: State
+      Entry: 3
+      Data: 4
+    - Name: 
+      Entry: 8
+      Data: 
+    - Name: 
+      Entry: 7
+      Data: 28|MarkerManager+Expression, com.audioplayer
+    - Name: Name
+      Entry: 1
+      Data: sad
+    - Name: State
+      Entry: 3
+      Data: 5
+    - Name: 
+      Entry: 8
+      Data: 
+    - Name: 
+      Entry: 7
+      Data: 29|MarkerManager+Expression, com.audioplayer
+    - Name: Name
+      Entry: 1
+      Data: smirk
+    - Name: State
+      Entry: 3
+      Data: 6
+    - Name: 
+      Entry: 8
+      Data: 
+    - Name: 
+      Entry: 7
+      Data: 30|MarkerManager+Expression, com.audioplayer
+    - Name: Name
+      Entry: 1
+      Data: sulky
+    - Name: State
+      Entry: 3
+      Data: 7
+    - Name: 
+      Entry: 8
+      Data: 
+    - Name: 
+      Entry: 7
+      Data: 31|MarkerManager+Expression, com.audioplayer
+    - Name: Name
+      Entry: 1
+      Data: wink
+    - Name: State
+      Entry: 3
+      Data: 8
+    - Name: 
+      Entry: 8
+      Data: 
+    - Name: 
+      Entry: 13
+      Data: 
+    - Name: 
+      Entry: 8
+      Data: 
+    - Name: 
+      Entry: 8
+      Data: 
+    - Name: 
+      Entry: 13
+      Data: 
+    - Name: 
+      Entry: 8
+      Data: 
+    - Name: clipsToMarkers
+      Entry: 7
+      Data: 32|System.Collections.Generic.Dictionary`2[[UnityEngine.AudioClip, UnityEngine.AudioModule],[System.Collections.Generic.List`1[[MarkerManager+Marker,
+        com.audioplayer]], mscorlib]], mscorlib
+    - Name: comparer
+      Entry: 7
+      Data: 33|System.Collections.Generic.ObjectEqualityComparer`1[[UnityEngine.AudioClip,
+        UnityEngine.AudioModule]], mscorlib
+    - Name: 
+      Entry: 8
+      Data: 
+    - Name: 
+      Entry: 12
+      Data: 0
+    - Name: 
+      Entry: 13
+      Data: 
+    - Name: 
+      Entry: 8
+      Data: 
+  CharacterNames:
+  - Marlene
+  - Hilde
+  lastPlayheadSample: -1
+  nextId: 1
