@@ -26,6 +26,16 @@ namespace CozyTGC.EditorTools
         static readonly Vector2 CardPixels = new Vector2(73f, 113f);
         static readonly Vector2 CardSize = new Vector2(0.73f, 1.13f);
 
+        /// <summary>Grid the card mesh is cut into, so the vertex shader has something to bend.</summary>
+        static readonly Vector2Int MeshCells = new Vector2Int(16, 24);
+        /// <summary>
+        /// Depth the mesh bounds reserve for that bend, in world units. Must clear
+        /// CardWear.MaxBow + MaxCornerBend + the material's _DentDisplace, or a
+        /// bowed card culls against a slab it no longer fits in and pops out of
+        /// view at the edge of the screen.
+        /// </summary>
+        const float MeshBendHeadroom = 0.14f;
+
         static readonly string[] Tiers = { "Common", "Shiny", "Holo", "Galaxy", "Chrome" };
 
         [MenuItem("Tools/Cozy TGC/Build Demo Scene", false, 0)]
@@ -62,28 +72,76 @@ namespace CozyTGC.EditorTools
         // -------------------------------------------------------------------
         // Mesh
         // -------------------------------------------------------------------
+        /// <summary>
+        /// A flat grid, not the four cornered quad it started as. The card bends -
+        /// a bowed print, a folded corner, a crease across the face - and bending
+        /// happens in the vertex shader, which can only move vertices that exist.
+        /// The grid is what gives it something to move.
+        ///
+        /// <see cref="MeshCells"/> is deliberately far below the 73x113 pixel grid:
+        /// the fold itself is low frequency and only has to read in the silhouette,
+        /// while the sharp side of the damage - the dent that catches the foil - is
+        /// a per pixel normal in the fragment stage and needs no geometry at all.
+        /// </summary>
         static Mesh BuildCardMesh()
         {
             float w = CardSize.x * 0.5f;
             float h = CardSize.y * 0.5f;
+            int cols = MeshCells.x;
+            int rows = MeshCells.y;
+            int stride = cols + 1;
 
-            var mesh = new Mesh { name = "CardQuad" };
-            mesh.vertices = new[]
-            {
-                new Vector3(-w, -h, 0f), new Vector3(w, -h, 0f),
-                new Vector3(-w,  h, 0f), new Vector3(w,  h, 0f),
-            };
-            mesh.uv = new[] { new Vector2(0f, 0f), new Vector2(1f, 0f), new Vector2(0f, 1f), new Vector2(1f, 1f) };
-            // Face normal is -Z, same as Unity's built-in Quad: the card's face
-            // points at a camera sitting on -Z with an unrotated transform, which
-            // is what keeps the artwork reading the right way round on screen.
-            // The card's visible side is therefore -transform.forward.
-            mesh.normals = new[] { Vector3.back, Vector3.back, Vector3.back, Vector3.back };
+            var vertices = new Vector3[stride * (rows + 1)];
+            var uvs = new Vector2[vertices.Length];
+            var normals = new Vector3[vertices.Length];
+            var tangents = new Vector4[vertices.Length];
             // w = -1 so the bitangent lines up with +V of the UVs.
             var tangent = new Vector4(1f, 0f, 0f, -1f);
-            mesh.tangents = new[] { tangent, tangent, tangent, tangent };
-            mesh.triangles = new[] { 0, 2, 1, 2, 3, 1 };
-            mesh.RecalculateBounds();
+
+            for (int y = 0; y <= rows; y++)
+            {
+                for (int x = 0; x <= cols; x++)
+                {
+                    int i = x + y * stride;
+                    var uv = new Vector2((float)x / cols, (float)y / rows);
+                    uvs[i] = uv;
+                    vertices[i] = new Vector3(Mathf.Lerp(-w, w, uv.x), Mathf.Lerp(-h, h, uv.y), 0f);
+                    // Face normal is -Z, same as Unity's built-in Quad: the card's face
+                    // points at a camera sitting on -Z with an unrotated transform, which
+                    // is what keeps the artwork reading the right way round on screen.
+                    // The card's visible side is therefore -transform.forward.
+                    normals[i] = Vector3.back;
+                    tangents[i] = tangent;
+                }
+            }
+
+            var triangles = new int[cols * rows * 6];
+            int t = 0;
+            for (int y = 0; y < rows; y++)
+            {
+                for (int x = 0; x < cols; x++)
+                {
+                    int bl = x + y * stride;
+                    int br = bl + 1;
+                    int tl = bl + stride;
+                    int tr = tl + 1;
+                    // Same winding the four vertex quad had, so the geometric normal
+                    // still comes out along -Z.
+                    triangles[t++] = bl; triangles[t++] = tl; triangles[t++] = br;
+                    triangles[t++] = tl; triangles[t++] = tr; triangles[t++] = br;
+                }
+            }
+
+            var mesh = new Mesh { name = "CardQuad" };
+            mesh.vertices = vertices;
+            mesh.uv = uvs;
+            mesh.normals = normals;
+            mesh.tangents = tangents;
+            mesh.triangles = triangles;
+            // Bounds have to cover where the vertex shader will put the card, not
+            // where the mesh sits at rest - a bowed card culled against a flat slab
+            // pops out of view at the edge of the screen.
+            mesh.bounds = new Bounds(Vector3.zero, new Vector3(CardSize.x, CardSize.y, MeshBendHeadroom * 2f));
 
             if (AssetDatabase.LoadAssetAtPath<Mesh>(MeshPath) != null) AssetDatabase.DeleteAsset(MeshPath);
             AssetDatabase.CreateAsset(mesh, MeshPath);
@@ -127,6 +185,24 @@ namespace CozyTGC.EditorTools
             mat.SetFloat("_MaskFromLuma", 0.45f);
             mat.SetFloat("_MaskContrast", 2f);
             mat.SetFloat("_MaskBias", 0.1f);
+
+            // Wear. _WearAmount stays at 0 on the shared material - CardWear turns it
+            // on per card through the property block, so a card with no damage never
+            // samples the maps at all. The rest are the look of the damage, which is
+            // the same on every tier.
+            mat.SetVector("_CardWorldSize", new Vector4(CardSize.x, CardSize.y, 0f, 0f));
+            mat.SetFloat("_WearAmount", 0f);
+            mat.SetFloat("_WearSteps", 5f);
+            mat.SetColor("_StockColor", new Color(0.84f, 0.80f, 0.72f, 1f));
+            mat.SetFloat("_InkLossDesat", 1.2f);
+            mat.SetFloat("_ScuffFoilLoss", 1f);
+            mat.SetFloat("_ScuffHaze", 0.35f);
+            mat.SetFloat("_ScuffGlint", 1.2f);
+            mat.SetFloat("_DentDepth", 8f);
+            mat.SetFloat("_DentDisplace", 0.012f);
+            mat.SetFloat("_CornerRadius", 0.5f);
+            mat.SetVector("_Bow", Vector4.zero);
+            mat.SetVector("_CornerBend", Vector4.zero);
         }
 
         static void ConfigureTier(Material mat, string tier)
@@ -216,6 +292,12 @@ namespace CozyTGC.EditorTools
 
             var view = root.AddComponent<CardView>();
             view.EditorBind(visual.transform, renderer, CardSize);
+
+            // The wear map has to be cut to the same grid the artwork is, or its
+            // texels stop landing on artwork texels and the damage goes blurry on
+            // a card whose whole look is that nothing is.
+            root.AddComponent<CardWear>()
+                .EditorBind(new Vector2Int((int)CardPixels.x, (int)CardPixels.y));
 
             var prefab = PrefabUtility.SaveAsPrefabAsset(root, PrefabPath);
             Object.DestroyImmediate(root);

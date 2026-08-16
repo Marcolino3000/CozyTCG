@@ -97,3 +97,7 @@ InitTestScene*.unity*
 
 # Auto-generated scenes by play mode tests
 /[Aa]ssets/[Ii]nit[Tt]est[Ss]cene*.unity*
+
+# Contact sheets written by the preview renderers under Tools > Cozy TGC
+/**/CardFoilPreview.png
+/**/CardWearPreview.png

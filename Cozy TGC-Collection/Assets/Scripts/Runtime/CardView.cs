@@ -299,14 +299,28 @@ namespace CozyTGC
         // -------------------------------------------------------------------
         // Material overrides (per renderer, the shared material stays untouched)
         // -------------------------------------------------------------------
+        /// <summary>
+        /// Resolves the renderer on demand. CardWear can bind its maps from its own
+        /// Awake, and script execution order between the two is not fixed - without
+        /// this, a card whose wear arrived first would silently drop it.
+        /// </summary>
+        MeshRenderer Target
+        {
+            get
+            {
+                if (meshRenderer == null) meshRenderer = GetComponentInChildren<MeshRenderer>();
+                return meshRenderer;
+            }
+        }
+
         public void SetFaces(Texture front, Texture back)
         {
-            if (meshRenderer == null) return;
+            if (Target == null) return;
             block ??= new MaterialPropertyBlock();
-            meshRenderer.GetPropertyBlock(block);
+            Target.GetPropertyBlock(block);
             if (front != null) block.SetTexture(FrontTexId, front);
             if (back != null) block.SetTexture(BackTexId, back);
-            meshRenderer.SetPropertyBlock(block);
+            Target.SetPropertyBlock(block);
         }
 
         public void SetSparkleSeed(float seed)
@@ -316,20 +330,38 @@ namespace CozyTGC
 
         public void SetFloat(int propertyId, float value)
         {
-            if (meshRenderer == null) return;
+            if (Target == null) return;
             block ??= new MaterialPropertyBlock();
-            meshRenderer.GetPropertyBlock(block);
+            Target.GetPropertyBlock(block);
             block.SetFloat(propertyId, value);
-            meshRenderer.SetPropertyBlock(block);
+            Target.SetPropertyBlock(block);
+        }
+
+        public void SetVector(int propertyId, Vector4 value)
+        {
+            if (Target == null) return;
+            block ??= new MaterialPropertyBlock();
+            Target.GetPropertyBlock(block);
+            block.SetVector(propertyId, value);
+            Target.SetPropertyBlock(block);
+        }
+
+        public void SetTexture(int propertyId, Texture value)
+        {
+            if (Target == null || value == null) return;
+            block ??= new MaterialPropertyBlock();
+            Target.GetPropertyBlock(block);
+            block.SetTexture(propertyId, value);
+            Target.SetPropertyBlock(block);
         }
 
         public float GetFloat(int propertyId, float fallback)
         {
-            if (meshRenderer == null) return fallback;
+            if (Target == null) return fallback;
             block ??= new MaterialPropertyBlock();
-            meshRenderer.GetPropertyBlock(block);
+            Target.GetPropertyBlock(block);
             if (block.HasFloat(propertyId)) return block.GetFloat(propertyId);
-            var mat = meshRenderer.sharedMaterial;
+            var mat = Target.sharedMaterial;
             return mat != null && mat.HasFloat(propertyId) ? mat.GetFloat(propertyId) : fallback;
         }
 

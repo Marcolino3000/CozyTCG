@@ -101,6 +101,7 @@ GameObject:
   - component: {fileID: 2263948300641746202}
   - component: {fileID: 8954289860953404712}
   - component: {fileID: 894114455973889446}
+  - component: {fileID: 8332419478461911996}
   m_Layer: 0
   m_Name: Card
   m_TagString: Untagged
@@ -176,3 +177,17 @@ MonoBehaviour:
   idleMotion: 1
   stackClearance: 0
   clearanceSlack: 1.1
+--- !u!114 &8332419478461911996
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 8102181430422445314}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 9c1c1fd4ebce647b199f20f14d2b4c63, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: Assembly-CSharp::CozyTGC.CardWear
+  resolution: {x: 73, y: 113}
+  defaultSeverity: 0

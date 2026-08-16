@@ -58,11 +58,29 @@ CBUFFER_START(UnityPerMaterial)
     float4 _FresnelColor;
     float  _FresnelStrength;
     float  _FresnelPower;
+
+    float4 _CardWorldSize;
+    float4 _StockColor;
+    float4 _Bow;
+    float4 _CornerBend;
+    float  _WearAmount;
+    float  _WearSteps;
+    float  _ScuffFoilLoss;
+    float  _ScuffHaze;
+    float  _ScuffGlint;
+    float  _InkLossDesat;
+    float  _DentDepth;
+    float  _DentDisplace;
+    float  _CornerRadius;
 CBUFFER_END
 
 TEXTURE2D(_FrontTex);   SAMPLER(sampler_FrontTex);
 TEXTURE2D(_BackTex);
 TEXTURE2D(_MaskTex);
+TEXTURE2D(_WearTex);    SAMPLER(sampler_WearTex);
+TEXTURE2D(_WearBackTex);
+
+#include "CardWear.hlsl"
 
 // ---------------------------------------------------------------------------
 // Pixel art sampling
@@ -135,7 +153,7 @@ float CardSparkles(float2 uv, float2 tilt, float density, float size, float spre
 // tilt is the parallax vector derived from the view direction in tangent space:
 // zero when the card faces the camera, growing as it is turned away. Every
 // layer below is driven by it, which is why the whole effect reacts to rotation.
-float3 CardFoil(float2 uv, float2 tilt, float ndv, float3 reflectDir, float3 baseColor)
+float3 CardFoil(float2 uv, float2 tilt, float ndv, float3 reflectDir, float3 baseColor, CardWear wear)
 {
     float2 hUV = uv;
 #ifdef _HOLOPIXELATE
@@ -189,12 +207,26 @@ float3 CardFoil(float2 uv, float2 tilt, float ndv, float3 reflectDir, float3 bas
     float lumaMask = saturate((luma + _MaskBias - 0.5) * _MaskContrast + 0.5);
     mask *= lerp(1.0, lumaMask, _MaskFromLuma);
 
+    // Abraded foil is dead foil. This one line is the loudest damage cue the card
+    // has: every layer above is driven off the same mask, so a scuffed patch
+    // stops diffracting, stops sparkling and stops sweeping all at once.
+    mask *= saturate(1.0 - wear.scuff * _ScuffFoilLoss);
+
     float3 foil = rainbow * _RainbowStrength * (0.35 + sweep);
     foil += _SweepColor.rgb * _SweepStrength * sweep;
     foil += _SparkleColor.rgb * _SparkleStrength * sparkle;
     foil += chrome * _ChromeStrength;
     foil += _FresnelColor.rgb * _FresnelStrength * fresnel;
     foil *= mask * _FoilIntensity;
+
+    // Added after the intensity, on purpose. Abrasion is not foil - a scuffed
+    // common card has no foil to lose but still has to show its scratches, and
+    // anything above this line is multiplied away to nothing on one.
+    if (wear.scuff > 0.0)
+    {
+        foil += _ScuffHaze * wear.scuff * (0.35 + sweep);
+        foil += _ScuffGlint * wear.scuff * sweep * fresnel;
+    }
 
     if (_ColorSteps >= 1.0) foil = floor(foil * _ColorSteps) / _ColorSteps;
 

@@ -63,6 +63,28 @@ Shader "Cozy TGC/Card Holo"
         _FresnelStrength("Strength", Range(0,3)) = 0.3
         _FresnelPower("Power", Range(0.5,16)) = 4
         _FresnelColor("Color", Color) = (0.8,0.9,1,1)
+
+        // No keyword gates the wear. _WearAmount at 0 is a uniform branch the GPU
+        // skips whole, which costs a pristine card nothing, and a keyword here
+        // would be one more thing to keep in step across the two passes.
+        [Header(Wear)][Space(4)]
+        _WearTex("Wear Front (R scuff, G ink, B height, A missing)", 2D) = "white" {}
+        _WearBackTex("Wear Back (R scuff, G ink)", 2D) = "white" {}
+        _WearAmount("Amount", Range(0,1)) = 0
+        _WearSteps("Quantize Steps (0 = off)", Range(0,16)) = 5
+        _StockColor("Card Stock", Color) = (0.84,0.80,0.72,1)
+        _InkLossDesat("Ink Loss Desaturate", Range(0,2)) = 1.2
+        _ScuffFoilLoss("Scuff Kills Foil", Range(0,1)) = 1
+        _ScuffHaze("Scuff Haze", Range(0,2)) = 0.35
+        _ScuffGlint("Scuff Glint", Range(0,4)) = 1.2
+        _DentDepth("Dent Normal Depth", Range(0,16)) = 8
+
+        [Header(Bending)][Space(4)]
+        _CardWorldSize("Card Size In Units", Vector) = (0.73,1.13,0,0)
+        _DentDisplace("Crease Displacement", Range(0,0.05)) = 0.012
+        _Bow("Bow (X, Y)", Vector) = (0,0,0,0)
+        _CornerBend("Corner Bend (BL, BR, TL, TR)", Vector) = (0,0,0,0)
+        _CornerRadius("Corner Bend Radius", Range(0.05,1.5)) = 0.5
     }
 
     SubShader
@@ -88,7 +110,9 @@ Shader "Cozy TGC/Card Holo"
             HLSLPROGRAM
             #pragma vertex Vert
             #pragma fragment Frag
-            #pragma target 3.0
+            // 3.5 rather than 3.0: the vertex stage samples the wear map now, and
+            // vertex texture fetch is only guaranteed from this tier up.
+            #pragma target 3.5
             #pragma multi_compile_instancing
             #pragma shader_feature_local_fragment _ _PIXELAA
             #pragma shader_feature_local_fragment _ _MASKTEX
@@ -124,8 +148,15 @@ Shader "Cozy TGC/Card Holo"
                 UNITY_TRANSFER_INSTANCE_ID(input, output);
                 UNITY_INITIALIZE_VERTEX_OUTPUT_STEREO(output);
 
-                VertexPositionInputs pos = GetVertexPositionInputs(input.positionOS.xyz);
-                VertexNormalInputs nrm = GetVertexNormalInputs(input.normalOS, input.tangentOS);
+                // Bend before anything is transformed, so the frame that comes out
+                // of GetVertexNormalInputs is the bent card's, not the flat one's.
+                float3 positionOS = input.positionOS.xyz;
+                float3 normalOS = input.normalOS;
+                float4 tangentOS = input.tangentOS;
+                CardApplyBend(positionOS, normalOS, tangentOS, input.uv);
+
+                VertexPositionInputs pos = GetVertexPositionInputs(positionOS);
+                VertexNormalInputs nrm = GetVertexNormalInputs(normalOS, tangentOS);
 
                 output.positionCS = pos.positionCS;
                 output.positionWS = pos.positionWS;
@@ -165,16 +196,33 @@ Shader "Cozy TGC/Card Holo"
                 half4 back  = SAMPLE_TEXTURE2D_GRAD(_BackTex, sampler_FrontTex, sampleUV, ddxUV, ddyUV);
                 half4 base  = facing > 0.0 ? front : back;
 
-                clip(base.a - _Cutoff);
+                CardWear wear = SampleCardWear(sampleUV, facing);
 
-                // View direction in tangent space -> parallax / tilt vector.
+                // A chip is material that is not there any more, so it leaves the
+                // card the same way a transparent texel does.
+                clip(base.a - wear.missing - _Cutoff);
+
+                // Dents and creases as a per pixel normal. Everything below reads
+                // the card's surface off this, so the whole foil breaks over a
+                // dent without a single line of it knowing about wear.
+                float3 nTS = CardWearNormal(uv, facing);
+
+                // View direction in tangent space -> parallax / tilt vector, taken
+                // against the dented normal rather than the flat one. Falls back to
+                // exactly the old maths where nTS is (0,0,1).
                 float3 vT = float3(dot(V, T), dot(V, B), dot(V, N));
-                float2 tilt = vT.xy / max(vT.z, 0.15) * _TiltGain;
+                float ndv = dot(vT, nTS);
+                float2 tilt = (vT.xy - nTS.xy * ndv) / max(ndv, 0.15) * _TiltGain;
                 tilt /= (1.0 + 0.35 * length(tilt));
 
-                float3 reflectDir = reflect(-V, N);
+                float3 Nw = normalize(T * nTS.x + B * nTS.y + N * nTS.z);
+                float3 reflectDir = reflect(-V, Nw);
+
                 float3 col = base.rgb * _Tint.rgb;
-                float3 foil = CardFoil(uv, tilt, vT.z, reflectDir, col);
+                col = CardApplyInkLoss(col, wear.inkLoss);
+                // Faded artwork foils less on its own: CardFoil masks by luminance,
+                // and this is already the faded colour going in.
+                float3 foil = CardFoil(uv, tilt, ndv, reflectDir, col, wear);
 
                 float3 additive = col + foil;
                 float3 screen = 1.0 - (1.0 - saturate(col)) * (1.0 - saturate(foil));
@@ -197,7 +245,9 @@ Shader "Cozy TGC/Card Holo"
             HLSLPROGRAM
             #pragma vertex DepthVert
             #pragma fragment DepthFrag
-            #pragma target 3.0
+            // 3.5 rather than 3.0: the vertex stage samples the wear map now, and
+            // vertex texture fetch is only guaranteed from this tier up.
+            #pragma target 3.5
             #pragma multi_compile_instancing
             #pragma shader_feature_local_fragment _ _PIXELAA
 
@@ -224,7 +274,11 @@ Shader "Cozy TGC/Card Holo"
                 UNITY_SETUP_INSTANCE_ID(input);
                 UNITY_TRANSFER_INSTANCE_ID(input, output);
                 UNITY_INITIALIZE_VERTEX_OUTPUT_STEREO(output);
-                output.positionCS = TransformObjectToHClip(input.positionOS.xyz);
+                // Has to bend exactly as the forward pass does, or depth and colour
+                // disagree about where the card is.
+                float3 positionOS = input.positionOS.xyz;
+                CardApplyBendPosition(positionOS, input.uv);
+                output.positionCS = TransformObjectToHClip(positionOS);
                 output.uv = TRANSFORM_TEX(input.uv, _FrontTex);
                 return output;
             }
@@ -235,7 +289,13 @@ Shader "Cozy TGC/Card Holo"
                 float2 sampleUV = CardPixelUV(input.uv, max(_CardPixels.xy, 1.0));
                 half alpha = SAMPLE_TEXTURE2D_GRAD(_FrontTex, sampler_FrontTex, sampleUV,
                                                    ddx(input.uv), ddy(input.uv)).a;
-                clip(alpha - _Cutoff);
+                // Chips have to take the depth with them. Left in, a chipped pixel
+                // writes depth over the background the forward pass clipped through
+                // to, and the hole fills with whatever is behind the card.
+                half missing = 0.0;
+                if (_WearAmount > 0.0)
+                    missing = SAMPLE_TEXTURE2D_LOD(_WearTex, sampler_WearTex, sampleUV, 0).a * _WearAmount;
+                clip(alpha - missing - _Cutoff);
                 return 0;
             }
             ENDHLSL

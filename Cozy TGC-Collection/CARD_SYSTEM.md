@@ -15,8 +15,21 @@ Open `Assets/Scenes/CardHoloDemo.unity` and press Play. Five cards, one per foil
 | `←` `→` | Cycle the artwork |
 | `Tab` | Switch deck (tarot ↔ spanish) |
 | `H` | Hide the tuning panel |
+| `1`–`6` | Pick a restoration tool — a held pointer then rubs instead of spinning |
+| `0` | Back to turning |
+| `Space` | Hold to turn the card with a tool still in hand |
 
-The on-screen panel tunes the foil of whichever card is under the pointer, live.
+The left panel tunes the foil, the right one ages the card, hands over a tool and reads its grade
+back. **Turn is the first entry in the tool row**, not the absence of a tool: with it selected the
+pointer belongs to the card and drags spin it, and holding `Space` borrows it back for as long as
+you hold it, so checking an angle mid-restoration does not mean putting the tool down and finding
+it again.
+
+Both panels act on the **last card hovered**, not the one under the pointer right now — reaching for
+a slider or a button takes the pointer off the card, and a panel that followed the live hover would
+take its own controls away before they could be clicked. The panels also block the cards underneath
+them while the pointer is over one, so nothing tilts at a cursor that is not talking to it and no
+card gets rubbed while the severity slider is being dragged.
 
 `Tools > Cozy TGC > Render Foil Preview` renders a 4-angle contact sheet to
 `CardFoilPreview.png` without entering play mode.
@@ -355,6 +368,8 @@ Two settings keep it reading as pixel art rather than a gradient pasted on top:
 | Sweep | `_SweepStrength`, `_SweepColor`, `_SweepWidth`, `_SweepAngle`, `_SweepTravel`, `_SweepOffset` |
 | Chrome | `_ChromeStrength`, `_ChromeSky`, `_ChromeGround`, `_ChromeSun`, `_ChromeSharp`, `_ChromeSunDir` |
 | Edge | `_FresnelStrength`, `_FresnelPower`, `_FresnelColor` |
+| Wear | `_WearTex`, `_WearBackTex`, `_WearAmount`, `_WearSteps`, `_StockColor`, `_InkLossDesat`, `_ScuffFoilLoss`, `_ScuffHaze`, `_ScuffGlint`, `_DentDepth` |
+| Bending | `_CardWorldSize`, `_DentDisplace`, `_Bow`, `_CornerBend`, `_CornerRadius` |
 
 **Rarity tiers** are just materials. `Card_Common` has `_FoilIntensity = 0`; add a tier by
 duplicating a material and assigning it to the card's `MeshRenderer`. Per-card variation
@@ -364,6 +379,93 @@ duplicating a material and assigning it to the card's `MeshRenderer`. Per-card v
 **Foil masks**: with no mask texture the foil is masked by artwork luminance
 (`_MaskFromLuma`). For per-card control, author a mask PNG, assign `_MaskTex` and
 enable `_UseMaskTex` so only the frame or a sigil foils.
+
+## Wear and restoration
+
+Five kinds of damage — scuffs and scratches, ink coming off, dents, creases, chipped edges —
+all ride in **one RGBA map per face** at the card's own 73×113, plus three scalars for the
+bending. `CardWear` owns both and is the only thing that writes them.
+
+| Channel | Damage | What it does in the shader |
+|---|---|---|
+| R | scuff, scratches | kills the foil mask, then adds haze and a glint the foil intensity cannot scale away |
+| G | ink loss | desaturates, then fades towards `_StockColor` |
+| B | height, 0.5 flat | neighbour taps → tangent normal; also displaces the mesh through `_DentDisplace` |
+| A | missing material | joins the artwork's own alpha in the `clip`, in **both** passes |
+
+R and G are per face, so a card has to be restored on both sides. **B and A always come from
+the front map**: a dent goes through the paper and a chip is missing from both sides. That is
+not tidiness — `DepthOnly` only ever sees the front, and a chip it could not see would write
+depth over a pixel the forward pass had already clipped through.
+
+**The height channel is the whole trick.** Every foil layer is driven by `tilt`, so perturbing
+the normal breaks the rainbow, the sweep, the sparkle aim and the chrome over a dent at once,
+without any of them knowing wear exists. A creased holo card loses its bands along the fold
+and catches a hard line instead. `_ScuffFoilLoss` does the same job the blunt way, by taking
+the foil mask down where the surface is abraded.
+
+Nothing is smoothed. Wear is sampled through the same pixel-snapped UV the artwork is, so wear
+texels land on art texels, and the dent normals are deliberately blocky — one normal per card
+pixel. A smooth bump map over pixel art reads as a different card. `_WearSteps` posterises the
+surface channels for the same reason it posterises the hue, and because damage in visible steps
+is what makes a rub read as progress: a scratch goes four texels, three, two, gone.
+
+**Bending is geometry**, which is why `CardQuad.asset` is a 16×24 grid and not the four-vertex
+quad it started as — a vertex shader can only move vertices that exist. `_Bow` bows the whole
+card on either axis, `_CornerBend` lifts one corner each, and creases deep enough to matter are
+read out of the height channel with a *linear* filter (the fragment stage uses the point one)
+so the fold does not stair-step across the mesh. `CardApplyBend` rebuilds the normal and tangent
+from three evaluations of the displacement rather than a hand-derived gradient; `DepthOnly` runs
+`CardApplyBendPosition`, which must agree with it exactly.
+
+`#pragma target` is **3.5**, not 3.0, because the vertex stage samples a texture now.
+
+**The map lives on the CPU.** It is 73×113: a stroke touches a few hundred texels and the whole
+thing uploads in a fraction of a frame, so generation, grading and saving stay plain C# with no
+readback and no ping-pong buffer. The texture is created **linear, point, clamp** — it is data,
+and a gamma curve on it would bend every rate the tools rub at.
+
+### Restoring
+
+`CardWear.Rub` is the only edit path there is, in both directions: `Age` stamps damage in,
+a tool rubs it back out. A tool (`RestorationTool`) is nothing but rates, and every one of them
+damages something else while it works — that is what puts the steps in an order.
+
+| Tool | Takes off | Puts back |
+|---|---|---|
+| Soft Cloth | light scuff, down to `scuffFloor` 0.4 | — |
+| Abrasive Pad | scuff, all of it | ink loss |
+| Burnishing Bone | dents and creases | scuff |
+| Press | bow and corner bend, whole card | — |
+| Paper Fill | chips | ink loss, the fill arrives blank |
+| Touch-Up Pen | ink loss | scuff, if overworked |
+
+Every tool also has `overworkScuff`, charged on any texel where it has nothing left to do. That
+is the rule that makes a light touch worth having, and it is why the intended order — press,
+burnish, abrade, fill, re-ink, polish — is enforced by the rates rather than by any check.
+
+`CardCondition` reads the map back as one number and a grade; `PriceMultiplier` is what the shop
+should move `CardData.price` by. Saving stores the seed and the stroke list, never the map:
+generation and rubbing are both deterministic, so replaying them lands on the same texels.
+
+**The raw channel means are tiny** — damage concentrates, so a chipped corner is sixty texels out
+of eight thousand. Scored against 1, every card in the game grades Mint. Each channel is therefore
+divided by what a severity-1 card actually averages (`ScuffFull` and friends, measured, not
+guessed). Change how ageing works and those constants have to be re-measured, or the grading
+silently flattens again.
+
+`Tools > Cozy TGC > Render Wear Preview` writes `CardWearPreview.png`: the same card aged, turned,
+restored and flipped, one per frame, and it logs the ramp those constants come from. As it stands:
+
+| | 0.00 | 0.30 | 0.55 | 0.85 | 1.00 |
+|---|---|---|---|---|---|
+| aged | Mint | Near Mint | Good | Played | Poor |
+
+A clumsy full-card pass with every tool takes an 0.85 card from Played back to Good. It does not
+reach Mint and should not: dents and bending come out completely, scuffs and ink loss only partly,
+and **chips barely move at all** — the fill has to be dwelled on a chip, and sweeping it round the
+whole border spends its time where there is nothing to fill. A chipped card staying cheap forever
+is the intended outcome.
 
 ## Orientation convention
 
