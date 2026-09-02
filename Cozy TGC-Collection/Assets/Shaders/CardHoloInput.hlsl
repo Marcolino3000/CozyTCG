@@ -72,6 +72,9 @@ CBUFFER_START(UnityPerMaterial)
     float  _DentDepth;
     float  _DentDisplace;
     float  _CornerRadius;
+
+    /// <summary>0 is off. Anything else is a view from CardDebug.hlsl.</summary>
+    float  _DebugView;
 CBUFFER_END
 
 TEXTURE2D(_FrontTex);   SAMPLER(sampler_FrontTex);
@@ -81,6 +84,7 @@ TEXTURE2D(_WearTex);    SAMPLER(sampler_WearTex);
 TEXTURE2D(_WearBackTex);
 
 #include "CardWear.hlsl"
+#include "CardDebug.hlsl"
 
 // ---------------------------------------------------------------------------
 // Pixel art sampling

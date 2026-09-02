@@ -263,6 +263,18 @@ namespace CozyTGC
         public void SetIdleMotion(bool value) => idleMotion = value;
 
         /// <summary>
+        /// How far and how fast the resting sway swings. For a bench showing a
+        /// view-dependent effect, where the card has to keep turning with nobody's
+        /// hand on it - the shipped 2.5 degrees is a card looking alive, not a card
+        /// being demonstrated.
+        /// </summary>
+        public void SetIdleSway(float degrees, float speed)
+        {
+            idleSway = Mathf.Max(0f, degrees);
+            idleSpeed = speed;
+        }
+
+        /// <summary>
         /// Turns depth clearance on or off. On for any card sharing a pile, so turning
         /// it lifts it clear of whatever is stacked behind it.
         /// </summary>

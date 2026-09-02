@@ -2,6 +2,13 @@
 
 Rotatable 3D pixel-art cards with a view-dependent TCG foil effect. URP 17.3, Unity 6000.3.
 
+**New here?** `CARD_WALKTHROUGH.md` is the tutorial: what a shader is, what the vertex and fragment
+stages each cost, and then the foil and the wear map taken apart one step at a time.
+`Assets/Scenes/CardExplainer.unity` (`Tools > Cozy TGC > Build Explainer Scene`) runs those same 36
+steps live — two cards, one finished and one carrying a single layer or a single kind of damage, so
+every step is a difference you can see side by side. This file is the reference: what each knob does,
+and why it is the value it is.
+
 ## Demo
 
 Open `Assets/Scenes/CardHoloDemo.unity` and press Play. Five cards, one per foil tier.
@@ -382,6 +389,8 @@ enable `_UseMaskTex` so only the frame or a sigil foils.
 
 ## Wear and restoration
 
+Step by step, with a card in front of you: `CARD_WALKTHROUGH.md` parts 2 and 3.
+
 Five kinds of damage — scuffs and scratches, ink coming off, dents, creases, chipped edges —
 all ride in **one RGBA map per face** at the card's own 73×113, plus three scalars for the
 bending. `CardWear` owns both and is the only thing that writes them.
@@ -428,7 +437,10 @@ and a gamma curve on it would bend every rate the tools rub at.
 ### Restoring
 
 `CardWear.Rub` is the only edit path there is, in both directions: `Age` stamps damage in,
-a tool rubs it back out. A tool (`RestorationTool`) is nothing but rates, and every one of them
+a tool rubs it back out. `Age` also takes an optional `Damage` mask, for stamping one generator pass
+on its own — the passes share one random stream, so a subset is its own card rather than a layer of
+the full one, and `Damage.All` is bit-identical to what it always was. The full-scale constants below
+are measured against `All` and nothing else. A tool (`RestorationTool`) is nothing but rates, and every one of them
 damages something else while it works — that is what puts the steps in an order.
 
 | Tool | Takes off | Puts back |

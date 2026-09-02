@@ -41,6 +41,30 @@ namespace CozyTGC
         public const float MaxCornerBend = 0.07f;
 
         /// <summary>
+        /// Which passes of the generator a card is aged with. All of them, normally.
+        /// The single kinds are for a bench that has to show one at a time, and for
+        /// tuning one pass without the other four piled on top of it.
+        ///
+        /// A subset is its own card, not a layer of the full one: the passes share
+        /// one random stream, so leaving one out changes the draws the rest get.
+        /// <see cref="Damage.All"/> is untouched by any of this, which is what the
+        /// full-scale constants on <see cref="CardCondition"/> are measured against.
+        /// </summary>
+        [Flags]
+        public enum Damage
+        {
+            None = 0,
+            EdgeWear = 1 << 0,
+            Scratches = 1 << 1,
+            Dents = 1 << 2,
+            Creases = 1 << 3,
+            Chips = 1 << 4,
+            /// <summary>Bow and folded corners. Geometry, so it is not in the map.</summary>
+            Bend = 1 << 5,
+            All = EdgeWear | Scratches | Dents | Creases | Chips | Bend,
+        }
+
+        /// <summary>
         /// One texel of the map, kept in floats rather than in the bytes it is
         /// uploaded as. A brush is soft, so its outermost texels are rubbed at a
         /// twentieth of the centre's rate - in bytes that rounds to no change at
@@ -77,6 +101,7 @@ namespace CozyTGC
 
         int seed;
         float severity;
+        Damage damage = Damage.All;
         readonly List<Stroke> strokes = new List<Stroke>();
 
         int W => resolution.x;
@@ -97,6 +122,14 @@ namespace CozyTGC
 
         public Vector2 Bow => bow;
         public Vector4 CornerBend => cornerBend;
+
+        /// <summary>
+        /// The maps as they were last uploaded, for reading only - the invariant
+        /// that <see cref="Rub"/> is the one edit path is what keeps ageing and
+        /// restoring a single system. Null until the card has been aged.
+        /// </summary>
+        public Texture2D FrontMap => frontMap;
+        public Texture2D BackMap => backMap;
 
         void Awake()
         {
@@ -121,10 +154,11 @@ namespace CozyTGC
         /// the seed, so the same card ages the same way every time it is loaded
         /// and none of it has to be stored.
         /// </summary>
-        public void Age(int cardSeed, float cardSeverity)
+        public void Age(int cardSeed, float cardSeverity, Damage kinds = Damage.All)
         {
             seed = cardSeed;
             severity = Mathf.Clamp01(cardSeverity);
+            damage = kinds;
             strokes.Clear();
             Rebuild();
         }
@@ -151,24 +185,32 @@ namespace CozyTGC
             frontDirty = backDirty = bendDirty = conditionDirty = true;
         }
 
+        bool Ages(Damage kind) => (damage & kind) != 0;
+
         void Generate()
         {
             var rng = new System.Random(seed);
             float s = severity;
 
-            EdgeWear(rng, s);
+            if (Ages(Damage.EdgeWear)) EdgeWear(rng, s);
 
             int scratches = Mathf.RoundToInt(Mathf.Lerp(0f, 16f, s * s));
-            for (int i = 0; i < scratches; i++) Scratch(rng, s);
+            if (Ages(Damage.Scratches))
+                for (int i = 0; i < scratches; i++) Scratch(rng, s);
 
             int dents = Mathf.RoundToInt(Mathf.Lerp(0f, 7f, s));
-            for (int i = 0; i < dents; i++) Dent(rng, s);
+            if (Ages(Damage.Dents))
+                for (int i = 0; i < dents; i++) Dent(rng, s);
 
             int creases = s < 0.45f ? 0 : (s < 0.8f ? 1 : 2);
-            for (int i = 0; i < creases; i++) Crease(rng, s);
+            if (Ages(Damage.Creases))
+                for (int i = 0; i < creases; i++) Crease(rng, s);
 
             int chips = Mathf.RoundToInt(Mathf.Lerp(0f, 5f, Mathf.InverseLerp(0.25f, 1f, s)));
-            for (int i = 0; i < chips; i++) Chip(rng, s);
+            if (Ages(Damage.Chips))
+                for (int i = 0; i < chips; i++) Chip(rng, s);
+
+            if (!Ages(Damage.Bend)) return;
 
             // A card that has been sat on is bowed, and the corner that was on the
             // outside of the pile is the one that turned up.
@@ -618,6 +660,7 @@ namespace CozyTGC
         {
             public int seed;
             public float severity;
+            public Damage damage = Damage.All;
             public List<Stroke> strokes = new List<Stroke>();
         }
 
@@ -625,6 +668,7 @@ namespace CozyTGC
         {
             seed = seed,
             severity = severity,
+            damage = this.damage,
             strokes = new List<Stroke>(strokes),
         };
 
@@ -633,6 +677,7 @@ namespace CozyTGC
             if (state == null) return;
             seed = state.seed;
             severity = state.severity;
+            damage = state.damage;
             strokes.Clear();
             if (state.strokes != null) strokes.AddRange(state.strokes);
             Rebuild();

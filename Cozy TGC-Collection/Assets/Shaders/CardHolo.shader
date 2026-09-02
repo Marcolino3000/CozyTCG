@@ -79,6 +79,13 @@ Shader "Cozy TGC/Card Holo"
         _ScuffGlint("Scuff Glint", Range(0,4)) = 1.2
         _DentDepth("Dent Normal Depth", Range(0,16)) = 8
 
+        // Off on every shipped material. It is a uniform, so the branch at the end
+        // of the forward pass is one every pixel of the draw takes the same way and
+        // the hardware skips it whole - the same reasoning that keeps the wear code
+        // out of a keyword.
+        [Header(Debug)][Space(4)]
+        _DebugView("View (0 off, see CardDebug.hlsl)", Range(0,9)) = 0
+
         [Header(Bending)][Space(4)]
         _CardWorldSize("Card Size In Units", Vector) = (0.73,1.13,0,0)
         _DentDisplace("Crease Displacement", Range(0,0.05)) = 0.012
@@ -227,6 +234,12 @@ Shader "Cozy TGC/Card Holo"
                 float3 additive = col + foil;
                 float3 screen = 1.0 - (1.0 - saturate(col)) * (1.0 - saturate(foil));
                 col = lerp(additive, screen, _FoilBlend);
+
+                // Everything the debug views show is handed in from here rather
+                // than recomputed, so a view cannot drift from what the card
+                // actually did this pixel.
+                if (_DebugView > 0.0)
+                    col = CardDebugColor(uv, sampleUV, nTS, tilt, ndv, wear, foil, facing);
 
                 return half4(col, 1.0);
             }

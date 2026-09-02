@@ -17,6 +17,9 @@ EditorBuildSettings:
   - enabled: 1
     path: Assets/Scenes/DialogDemo.unity
     guid: 20aa031f3b4674fb3afcfaea0e6eca46
+  - enabled: 1
+    path: Assets/Scenes/CardExplainer.unity
+    guid: dff6d04e0380c4d22ad7e138a76c9f3a
   m_configObjects:
     com.unity.input.settings.actions: {fileID: -944628639613478452, guid: 052faaac586de48259a63d0c4782560b, type: 3}
   m_UseUCBPForAssetBundles: 0
