@@ -100,10 +100,12 @@ Run **Tools > Cozy TGC > Apply UI Kit Import Settings** after adding art to `Res
 
 ## Shaders
 
-`CardHolo.shader` / `CardPack.shader` / `SpriteSheet.shader` each pair with an `*Input.hlsl` holding the CBUFFER, samplers and the actual math. All have a `UniversalForward` and a `DepthOnly` pass — keyword pragmas must be kept in sync across both passes. `SpriteSheet.shader` is the plain atlas quad (album books, shelf icons) and deliberately has no keywords at all, so its pixel filter is always on.
+`CardHolo.shader` / `CardPack.shader` / `SpriteSheet.shader` / `PackFlash.shader` each pair with an `*Input.hlsl` holding the CBUFFER, samplers and the actual math. All but `PackFlash.shader` — which is transparent and writes no depth — have a `UniversalForward` and a `DepthOnly` pass, and keyword pragmas must be kept in sync across both passes. `SpriteSheet.shader` is the plain atlas quad (album books, shelf icons) and deliberately has no keywords at all, so its pixel filter is always on.
 
 Keyword-backed features (`_PIXELAA`, `_MASKTEX`, `_HOLOPIXELATE`) need **both** the float property and the shader keyword set together; see `CardDemoBuilder.SetToggle`. Setting only the float silently does nothing.
 
 `CardHolo.shader` also carries `_DebugView` and `CardDebug.hlsl`: ten views of the forward pass's own intermediates (uv, the snapped uv, the wear-perturbed normal, tilt, N·V, the wear channels, the foil alone, texel density), switched at the end of `Frag`. It is off on every shipped material and it is a **uniform** branch, so a card at 0 pays nothing — the same reasoning that keeps the wear code out of a keyword. Every value it draws is handed in from `Frag` rather than recomputed, because a debug view that recomputes its subject is free to drift from it.
+
+`PackFlash.shader` is the light out of a cut pack — the bar on the seam and the dim behind it, one shader doing both because they are the same moment from either side of the wrapper. The mode is a **uniform branch** and the blend state (`_SrcBlend` / `_DstBlend` / `_ZTest`) is a material property, so `PackFlare.mat` adds with `ZTest Always` and `PackDim.mat` multiplies with an ordinary depth test, without two shaders that would then drift apart. Its quad carries **pack-space UVs** rather than 0..1, which is what keeps the bar talking about the cut in the same units the tear is measured in.
 
 `CardOverlay.shader` is the explainer's geometry overlay — flat colour, `ZTest Always`, `Blend SrcAlpha OneMinusSrcAlpha` — and includes `CardWear.hlsl` purely for `CardApplyBend`. Everything that file reads has to be declared in its CBUFFER even where nothing calls it, because the whole include is compiled.

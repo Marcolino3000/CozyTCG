@@ -24,6 +24,18 @@ CBUFFER_START(UnityPerMaterial)
     float  _TearEdgeWidth;
     float  _TearShade;
 
+    float  _CutHead;
+    float  _CutGlow;
+    float  _CutWidth;
+    float4 _CutColor;
+    float  _CutRainbow;
+    float  _Flash;
+
+    float  _Flutter;
+    float  _FlutterWaves;
+    float  _FlutterPhase;
+    float  _FlutterCurl;
+
     float4 _ShineColor;
     float  _ShineStrength;
     float  _ShineWidth;
@@ -103,6 +115,23 @@ float3 PackPeelPosition(float3 positionOS, float2 uv, float2 uv1, out float shap
     return positionOS;
 }
 
+// A travelling wave along the strip, for the lid once it has come off the pack. It
+// is driven off uv.x and the shared hinge ramp rather than anything per column, for
+// the same reason the peel is: neighbouring columns have to agree on their shared
+// edge, or the wave shears the strip into stripes.
+//
+// The hinge end is held down and the free edge swings, so the strip flaps the way a
+// piece of foil does rather than sliding about as a rigid sheet. It is written for
+// the lid but costs nothing on the body, whose _Flutter is left at zero.
+float3 PackFlutter(float3 positionOS, float2 uv, float2 uv1)
+{
+    float wave = sin((uv.x * _FlutterWaves + _FlutterPhase) * 6.28318530718);
+    float grip = 0.25 + uv1.y;
+    positionOS.z -= wave * _Flutter * grip;
+    positionOS.y += wave * _Flutter * _FlutterCurl * grip;
+    return positionOS;
+}
+
 // Raw torn lip, stepped onto whole texture pixels. A smooth falloff here reads as
 // a glow pasted over the pixel art, so the lip is one pixel bright and the shading
 // behind it steps down a pixel at a time. tearDist comes off the mesh in pixels.
@@ -120,6 +149,35 @@ void PackTornEdge(float tearDist, float torn, out float lip, out float shade)
 float3 PackSpectrum(float t)
 {
     return saturate(0.5 + 0.5 * cos(6.28318530718 * (t + float3(0.0, 0.33, 0.67))));
+}
+
+// ---------------------------------------------------------------------------
+// The cut
+// ---------------------------------------------------------------------------
+// Light spilling out of the seam while it is being cut open. Same pixel discipline
+// as PackTornEdge: the band is stepped on whole texture pixels, because a smooth
+// falloff over pixel art reads as a glow pasted on top of the wrapper rather than
+// as light coming through it.
+//
+// swept is the peel shape, so the seam only lights where the sweep has actually
+// been, and the head of the sweep burns brighter than the tail it leaves behind -
+// which is what makes the cut read as travelling rather than as the whole seam
+// fading up at once. _Flash then blows the same band open at the end.
+float3 PackCutLight(float tearDist, float swept, float u)
+{
+    float width = max(_CutWidth, 1.0) * (1.0 + _Flash * 5.0);
+    float band = saturate(1.0 - floor(tearDist) / width);
+
+    float head = exp(-pow(abs(u - _CutHead) / 0.1, 2.0) * 2.0);
+    float amount = swept * _CutGlow * (1.0 + head * 2.0) + _Flash * 3.0;
+
+    // Colour only where the light has fallen off: a cut edge is blown out white
+    // where it is strongest and splits into a spectrum on the way out of it.
+    float3 fringe = lerp(PackSpectrum(band * 0.8 + 0.1), _CutColor.rgb, saturate(band * 1.4 - 0.2));
+    float3 tint = lerp(_CutColor.rgb, fringe, _CutRainbow);
+    tint = lerp(tint, float3(1.0, 1.0, 1.0), saturate(band * band + _Flash * 0.8));
+
+    return tint * (band * band * amount);
 }
 
 // Foil sheen: a gaussian bar that slides across the wrapper as it tilts, same

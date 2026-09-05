@@ -19,13 +19,17 @@ namespace CozyTGC.EditorTools
     public static class CardPackBuilder
     {
         const string ShaderPath = "Assets/Shaders/CardPack.shader";
+        const string FlashShaderPath = "Assets/Shaders/PackFlash.shader";
         const string SlotShaderPath = "Assets/Shaders/CardSlot.shader";
         const string SpriteShaderPath = "Assets/Shaders/SpriteSheet.shader";
         const string SheetPath = "Assets/Resources/" + CardArtLibrary.Root + "CardPacks/CardPacks.png";
         const string BodyMeshPath = "Assets/Meshes/PackBody.asset";
         const string LidMeshPath = "Assets/Meshes/PackLid.asset";
         const string UnitQuadPath = "Assets/Meshes/UnitQuad.asset";
+        const string FlareMeshPath = "Assets/Meshes/PackFlare.asset";
         const string MaterialPath = "Assets/Materials/CardPack.mat";
+        const string FlareMaterialPath = "Assets/Materials/PackFlare.mat";
+        const string DimMaterialPath = "Assets/Materials/PackDim.mat";
         const string SlotMaterialPath = "Assets/Materials/CardSlot.mat";
         const string PocketMaterialPath = "Assets/Materials/AlbumPocket.mat";
         const string TraySlotMaterialPath = "Assets/Materials/PackTraySlot.mat";
@@ -68,6 +72,15 @@ namespace CozyTGC.EditorTools
 
         /// <summary>Body and lid overlap by a pixel so no hairline shows along the seam.</summary>
         const float SeamOverlap = 0.01f;
+
+        /// <summary>
+        /// How many pack widths the light bar spans. The flash runs out past both ends
+        /// of the wrapper, so the quad it is drawn on has to be wider than the pack -
+        /// and its UVs stay in pack space, which is what lets the shader talk about the
+        /// cut in the same 0..1 the sweep is measured in.
+        /// </summary>
+        const float FlareSpread = 4f;
+        const float FlareHeight = 0.7f;
 
         static readonly string[] Tiers = { "Common", "Shiny", "Holo", "Galaxy", "Chrome" };
 
@@ -193,6 +206,13 @@ namespace CozyTGC.EditorTools
                 return;
             }
 
+            var flashShader = AssetDatabase.LoadAssetAtPath<Shader>(FlashShaderPath);
+            if (flashShader == null)
+            {
+                Debug.LogError($"[Cozy TGC] Pack flash shader not found at {FlashShaderPath}");
+                return;
+            }
+
             var cardPrefab = AssetDatabase.LoadAssetAtPath<GameObject>(CardPrefabPath);
             var cardMesh = AssetDatabase.LoadAssetAtPath<Mesh>(CardMeshPath);
             if (cardPrefab == null || cardMesh == null)
@@ -213,7 +233,10 @@ namespace CozyTGC.EditorTools
             Mesh body = BuildPackMesh(seam, tearY, false, BodyMeshPath, "PackBody");
             Mesh lid = BuildPackMesh(seam, tearY, true, LidMeshPath, "PackLid");
             Mesh unitQuad = BuildUnitQuad();
+            Mesh flareMesh = BuildFlareMesh();
             Material material = BuildMaterial(shader);
+            Material flareMaterial = BuildFlareMaterial(flashShader);
+            Material dimMaterial = BuildDimMaterial(flashShader);
             Material slotMaterial = BuildSlotMaterial(slotShader);
             if (AssetDatabase.LoadAssetAtPath<Material>(StaleAlbumPageMaterialPath) != null)
                 AssetDatabase.DeleteAsset(StaleAlbumPageMaterialPath);
@@ -223,7 +246,8 @@ namespace CozyTGC.EditorTools
             Material tableMaterial = BuildTableMaterial(spriteShader);
             Material[] bookMaterials = BuildBookMaterials(spriteShader);
             Material[] iconMaterials = BuildIconMaterials(spriteShader);
-            GameObject prefab = BuildPrefab(body, lid, material, tearY);
+            GameObject prefab = BuildPrefab(body, lid, flareMesh, unitQuad, material,
+                                            flareMaterial, dimMaterial, tearY);
             GameObject slotPrefab = BuildSlotPrefab(cardMesh, slotMaterial);
             BuildScene(prefab, slotPrefab, cardPrefab, unitQuad, pocketMaterial,
                        traySlotMaterial, trayPackMaterial, bookMaterials, iconMaterials,
@@ -404,6 +428,45 @@ namespace CozyTGC.EditorTools
             return AssetDatabase.LoadAssetAtPath<Mesh>(UnitQuadPath);
         }
 
+        /// <summary>
+        /// The quad the light out of the cut is drawn on. It is wider than the pack,
+        /// because the flash runs out past both ends of the seam, but its UVs are
+        /// authored in *pack* space - u is 0 and 1 on the wrapper's own edges and
+        /// carries on past them. That is what lets the shader be handed the sweep in
+        /// the same 0..1 the tear is measured in, with nothing to keep in step.
+        ///
+        /// v is signed distance from the cut, -1..1 over the quad, so the bar's
+        /// thickness is a fraction of the quad rather than a world measurement.
+        /// </summary>
+        static Mesh BuildFlareMesh()
+        {
+            float halfWidth = PackSize.x * FlareSpread * 0.5f;
+            float halfHeight = FlareHeight * 0.5f;
+            float halfU = FlareSpread * 0.5f;
+
+            var mesh = new Mesh { name = "PackFlare" };
+            mesh.vertices = new[]
+            {
+                new Vector3(-halfWidth, -halfHeight, 0f), new Vector3(halfWidth, -halfHeight, 0f),
+                new Vector3(-halfWidth,  halfHeight, 0f), new Vector3(halfWidth,  halfHeight, 0f),
+            };
+            mesh.uv = new[]
+            {
+                new Vector2(0.5f - halfU, -1f), new Vector2(0.5f + halfU, -1f),
+                new Vector2(0.5f - halfU,  1f), new Vector2(0.5f + halfU,  1f),
+            };
+            mesh.normals = new[] { Vector3.back, Vector3.back, Vector3.back, Vector3.back };
+            var tangent = new Vector4(1f, 0f, 0f, -1f);
+            mesh.tangents = new[] { tangent, tangent, tangent, tangent };
+            mesh.triangles = new[] { 0, 2, 1, 2, 3, 1 };
+            mesh.RecalculateBounds();
+
+            if (AssetDatabase.LoadAssetAtPath<Mesh>(FlareMeshPath) != null)
+                AssetDatabase.DeleteAsset(FlareMeshPath);
+            AssetDatabase.CreateAsset(mesh, FlareMeshPath);
+            return AssetDatabase.LoadAssetAtPath<Mesh>(FlareMeshPath);
+        }
+
         // -------------------------------------------------------------------
         // Material
         // -------------------------------------------------------------------
@@ -429,6 +492,12 @@ namespace CozyTGC.EditorTools
             mat.SetFloat("_TearEdgeWidth", 3f);
             mat.SetFloat("_TearShade", 0.4f);
 
+            mat.SetFloat("_CutWidth", 2f);
+            mat.SetFloat("_CutRainbow", 0.75f);
+            mat.SetColor("_CutColor", new Color(0.55f, 0.95f, 1f, 1f));
+            mat.SetFloat("_FlutterWaves", 1.7f);
+            mat.SetFloat("_FlutterCurl", 0.55f);
+
             mat.SetFloat("_ShineStrength", 0.42f);
             mat.SetFloat("_ShineWidth", 0.3f);
             mat.SetFloat("_ShineTravel", 1.1f);
@@ -437,6 +506,55 @@ namespace CozyTGC.EditorTools
 
             AssetDatabase.CreateAsset(mat, MaterialPath);
             return AssetDatabase.LoadAssetAtPath<Material>(MaterialPath);
+        }
+
+        /// <summary>
+        /// The light bar. Added rather than blended, because it is light rather than
+        /// paint, and depth tested away by nothing at all - the flash goes off in
+        /// front of whatever happens to be standing there.
+        /// </summary>
+        static Material BuildFlareMaterial(Shader shader)
+        {
+            if (AssetDatabase.LoadAssetAtPath<Material>(FlareMaterialPath) != null)
+                AssetDatabase.DeleteAsset(FlareMaterialPath);
+
+            var mat = new Material(shader) { name = "PackFlare" };
+            mat.SetFloat("_Mode", 0f);
+            mat.SetFloat("_SrcBlend", (float)BlendMode.One);
+            mat.SetFloat("_DstBlend", (float)BlendMode.One);
+            mat.SetFloat("_ZTest", (float)CompareFunction.Always);
+
+            mat.SetFloat("_Thickness", 0.08f);
+            mat.SetFloat("_Rainbow", 0.8f);
+            mat.SetFloat("_Feather", 0.02f);
+            mat.SetFloat("_HeadWidth", 0.07f);
+            mat.SetFloat("_FlashSpill", 0.85f);
+            mat.SetColor("_CoreColor", Color.white);
+            mat.SetColor("_EdgeColor", new Color(0.5f, 0.92f, 1f, 1f));
+
+            AssetDatabase.CreateAsset(mat, FlareMaterialPath);
+            return AssetDatabase.LoadAssetAtPath<Material>(FlareMaterialPath);
+        }
+
+        /// <summary>
+        /// The room going quiet. Multiplied over what is already drawn, and depth
+        /// tested normally: it is parked *behind* the wrapper, so the pack occludes it
+        /// and everything further back - table, piles, album - is what darkens.
+        /// </summary>
+        static Material BuildDimMaterial(Shader shader)
+        {
+            if (AssetDatabase.LoadAssetAtPath<Material>(DimMaterialPath) != null)
+                AssetDatabase.DeleteAsset(DimMaterialPath);
+
+            var mat = new Material(shader) { name = "PackDim" };
+            mat.SetFloat("_Mode", 1f);
+            mat.SetFloat("_SrcBlend", (float)BlendMode.DstColor);
+            mat.SetFloat("_DstBlend", (float)BlendMode.Zero);
+            mat.SetFloat("_ZTest", (float)CompareFunction.LessEqual);
+            mat.SetColor("_DimColor", new Color(0.34f, 0.36f, 0.46f, 1f));
+
+            AssetDatabase.CreateAsset(mat, DimMaterialPath);
+            return AssetDatabase.LoadAssetAtPath<Material>(DimMaterialPath);
         }
 
         static Material BuildSlotMaterial(Shader shader)
@@ -609,7 +727,9 @@ namespace CozyTGC.EditorTools
         // -------------------------------------------------------------------
         // Prefab
         // -------------------------------------------------------------------
-        static GameObject BuildPrefab(Mesh body, Mesh lid, Material material, float tearY)
+        static GameObject BuildPrefab(Mesh body, Mesh lid, Mesh flare, Mesh unitQuad,
+                                      Material material, Material flareMaterial,
+                                      Material dimMaterial, float tearY)
         {
             var root = new GameObject("CardPack");
 
@@ -629,8 +749,27 @@ namespace CozyTGC.EditorTools
             lidGO.AddComponent<MeshFilter>().sharedMesh = lid;
             var lidRenderer = ConfigureRenderer(lidGO.AddComponent<MeshRenderer>(), material);
 
+            // On the seam and a little in front of the wrapper. It draws with ZTest
+            // Always, so the offset is only there to keep it out of the body's depth
+            // if that ever changes back.
+            var flareGO = new GameObject("Flare");
+            flareGO.transform.SetParent(visual.transform, false);
+            flareGO.transform.localPosition = new Vector3(0f, tearY, -0.02f);
+            flareGO.AddComponent<MeshFilter>().sharedMesh = flare;
+            var flareRenderer = ConfigureRenderer(flareGO.AddComponent<MeshRenderer>(), flareMaterial);
+            flareRenderer.enabled = false;
+
+            // Outside Visual: the darkener covers the frame and is refitted to the
+            // camera every frame, so the wrapper's lean must not carry it along.
+            var dimGO = new GameObject("Dim");
+            dimGO.transform.SetParent(root.transform, false);
+            dimGO.AddComponent<MeshFilter>().sharedMesh = unitQuad;
+            var dimRenderer = ConfigureRenderer(dimGO.AddComponent<MeshRenderer>(), dimMaterial);
+            dimRenderer.enabled = false;
+
             var view = root.AddComponent<CardPackView>();
             view.EditorBind(null, visual.transform, lidGO.transform, bodyRenderer, lidRenderer, PackSize);
+            view.EditorBindLight(flareRenderer, dimGO.transform, dimRenderer);
 
             var prefab = PrefabUtility.SaveAsPrefabAsset(root, PrefabPath);
             Object.DestroyImmediate(root);
@@ -873,6 +1012,9 @@ namespace CozyTGC.EditorTools
                             packGO.transform.Find("Visual/Body").GetComponent<MeshRenderer>(),
                             packGO.transform.Find("Visual/Lid").GetComponent<MeshRenderer>(),
                             PackSize);
+            pack.EditorBindLight(packGO.transform.Find("Visual/Flare").GetComponent<MeshRenderer>(),
+                                 packGO.transform.Find("Dim"),
+                                 packGO.transform.Find("Dim").GetComponent<MeshRenderer>());
             PrefabUtility.RecordPrefabInstancePropertyModifications(pack);
 
             var deckGO = new GameObject("Deck", typeof(CardPackDeck));

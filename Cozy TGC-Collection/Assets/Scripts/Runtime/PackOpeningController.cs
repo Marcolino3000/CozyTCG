@@ -286,10 +286,23 @@ namespace CozyTGC
             if (deck != null) deck.gameObject.SetActive(deckWasActive);
         }
 
-        /// <summary>Is the wrapper still on? Then the rig rides close to the camera.</summary>
-        bool PackSealed => pack != null && pack.gameObject.activeSelf &&
-                           (pack.Current == CardPackView.State.Sealed ||
-                            pack.Current == CardPackView.State.Tearing);
+        /// <summary>
+        /// Is the seam still shut? Then the pack has not been opened and can go back in
+        /// the drawer.
+        /// </summary>
+        bool PackWhole => pack != null && pack.gameObject.activeSelf &&
+                          (pack.Current == CardPackView.State.Sealed ||
+                           pack.Current == CardPackView.State.Tearing);
+
+        /// <summary>
+        /// Is the wrapper still on? Then the rig rides close to the camera. This is a
+        /// beat longer than <see cref="PackWhole"/> - the flash counts as still on,
+        /// because pulling back while the cut is going off would drag the pack away
+        /// from the light coming out of it.
+        /// </summary>
+        bool PackSealed => PackWhole ||
+                           (pack != null && pack.gameObject.activeSelf &&
+                            pack.Current == CardPackView.State.Flash);
 
         void Update()
         {
@@ -513,7 +526,7 @@ namespace CozyTGC
         /// </summary>
         bool StowPack()
         {
-            if (!PackSealed) return false;
+            if (!PackWhole) return false;
 
             nextPack = pack.PackIndex;
             pack.gameObject.SetActive(false);
@@ -1290,6 +1303,10 @@ namespace CozyTGC
             if (pack.Current == CardPackView.State.Sealed || pack.Current == CardPackView.State.Tearing)
                 return "Drag across the crimped top of the pack to rip it open.\n" +
                        "Click the table around it to put it back in the drawer.";
+            // Nothing to do while the cut is going off, and the line above has stopped
+            // being true - the pack cannot go back in the drawer once it is open.
+            if (pack.Current == CardPackView.State.Flash || pack.Current == CardPackView.State.Opening)
+                return string.Empty;
             if (heldCard != null || deck.TopRevealed)
                 return "Click again to file the card into the default\nslot, or drag it onto any slot you like.";
             if (deck.CanDraw)

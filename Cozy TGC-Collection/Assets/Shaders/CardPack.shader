@@ -23,6 +23,20 @@ Shader "Cozy TGC/Card Pack"
         _TearEdgeColor("Torn Edge Color", Color) = (1,0.96,0.88,1)
         _TearShade("Torn Edge Shade", Range(0,1)) = 0.4
 
+        [Header(Cut)][Space(4)]
+        _CutGlow("Seam Light", Range(0,4)) = 0
+        _CutWidth("Seam Light Width (pixels)", Range(1,24)) = 2
+        _CutColor("Seam Light Color", Color) = (0.55,0.95,1,1)
+        _CutRainbow("Seam Rainbow", Range(0,1)) = 0.7
+        _CutHead("Sweep Head (U)", Range(-0.5,1.5)) = 0.5
+        _Flash("Flash", Range(0,1)) = 0
+
+        [Header(Flutter)][Space(4)]
+        _Flutter("Flutter Amplitude", Range(0,0.4)) = 0
+        _FlutterWaves("Flutter Waves", Range(0.25,6)) = 1.6
+        _FlutterPhase("Flutter Phase", Float) = 0
+        _FlutterCurl("Flutter Curl", Range(0,2)) = 0.55
+
         [Header(Foil Sheen)][Space(4)]
         _ShineStrength("Strength", Range(0,3)) = 0.4
         _ShineColor("Color", Color) = (1,1,1,1)
@@ -96,6 +110,7 @@ Shader "Cozy TGC/Card Pack"
 
                 float shape;
                 float3 positionOS = PackPeelPosition(input.positionOS.xyz, input.uv, input.uv1, shape);
+                positionOS = PackFlutter(positionOS, input.uv, input.uv1);
 
                 VertexPositionInputs pos = GetVertexPositionInputs(positionOS);
                 VertexNormalInputs nrm = GetVertexNormalInputs(input.normalOS, input.tangentOS);
@@ -143,8 +158,14 @@ Shader "Cozy TGC/Card Pack"
                 col *= 1.0 - _TearShade * shade;
                 col += _TearEdgeColor.rgb * (_TearEdge * lip);
 
+                // Light through the seam. Added before the back shade so the far side
+                // of a flipping lid keeps its rim: the cut goes through the foil, so
+                // it is just as bright looked at from behind.
+                float3 cut = PackCutLight(input.tear.x, saturate(input.tear.y), input.uv.x);
+
                 // The underside of a peeled flap is the inside of the wrapper.
                 col *= facing > 0.0 ? 1.0 : (1.0 - _BackShade);
+                col += cut;
 
                 return half4(col, 1.0);
             }
@@ -196,6 +217,7 @@ Shader "Cozy TGC/Card Pack"
                 // drifts away from the peeled flap.
                 float shape;
                 float3 positionOS = PackPeelPosition(input.positionOS.xyz, input.uv, input.uv1, shape);
+                positionOS = PackFlutter(positionOS, input.uv, input.uv1);
 
                 output.positionCS = TransformObjectToHClip(positionOS);
                 output.uv = input.uv;

@@ -31,7 +31,16 @@ Material:
     m_Ints: []
     m_Floats:
     - _BackShade: 0.45
+    - _CutGlow: 0
+    - _CutHead: 0.5
+    - _CutRainbow: 0.75
+    - _CutWidth: 2
     - _Cutoff: 0.5
+    - _Flash: 0
+    - _Flutter: 0
+    - _FlutterCurl: 0.55
+    - _FlutterPhase: 0
+    - _FlutterWaves: 1.7
     - _PeelCurl: 1.5
     - _PeelFeather: 0.09
     - _PeelFlat: 0
@@ -49,6 +58,7 @@ Material:
     - _TearEdgeWidth: 3
     - _TearShade: 0.4
     m_Colors:
+    - _CutColor: {r: 0.55, g: 0.95, b: 1, a: 1}
     - _PackPixels: {r: 84, g: 154, b: 0, a: 0}
     - _PackRect: {r: 0.003533569, g: 0.95004773, b: 0.09893993, a: 0.04899777}
     - _ShineColor: {r: 1, g: 1, b: 1, a: 1}

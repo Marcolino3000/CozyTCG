@@ -71,8 +71,11 @@ Open `Assets/Scenes/PackOpening.unity` and press Play.
 
 The tear tracks how much of the pack's *width* the cursor has swept, not how far it has
 travelled, so it works from either side and stalls rather than cancels if the cursor wanders
-off the seam — let go half way and the pack re-seals. Sweep `tearSpan` (82% by default) and
-the wrapper slides out of frame, revealing five cards rolled from the rarity weights on
+off the seam — let go half way and the pack re-seals. Light runs out of the seam behind the
+sweep, brightest at the end the cursor just pushed out, and the rest of the table darkens
+around it. Sweep `tearSpan` (82% by default) and the cut goes off: a prismatic flash across
+the seam, the sealed strip thrown clear of the frame, and the opened wrapper standing there
+for a beat before it drops — revealing five cards rolled from the rarity weights on
 `PackOpeningController`, with the last card guaranteed above common.
 
 **The deck is rolled per card, not per pack**, from `packWeight` on each `CardArtSet`: at 9
@@ -93,8 +96,9 @@ one on the table — and since a sealed pack rides up close to the camera, that 
 large so it can be opened". One at a time: clicking it while a pack is still out spends
 nothing, and neither does clicking it to come back from an album.
 
-`Q` skips the ceremony: the wrapper is ripped in one go (`CardPackView.RipOpen` fills the tear
-in rather than jumping over it, so the strip still peels as it falls) and every card is turned
+`Q` skips the ceremony: the wrapper is ripped in one go (`CardPackView.RipOpen` fills the
+sweep in rather than jumping over it, so the flash goes off across the whole seam the way it
+does by hand) and every card is turned
 over and sent to the **default pile**, the same place a plain click on the stack sends them.
 With nothing on the table it takes the next pack out of the drawer first, so one press is one
 pack from drawer to pile; with a pack half dealt it finishes that one instead of skipping to
@@ -290,8 +294,9 @@ for (`ShopStock.RollAd` and the four builders under it, paid in multiples of `ca
 `CardArtSet` as wired in `CardPackBuilder.BuildArtSets` and need a scene rebuild to change.
 Everything on the asset is picked up on the next Play.
 
-`Tools > Cozy TGC > Build Pack Opening Scene` regenerates the wrapper meshes, both materials,
-the pack and slot prefabs and the scene, and adds the scene to the build settings. It needs
+`Tools > Cozy TGC > Build Pack Opening Scene` regenerates the wrapper meshes, the light bar
+quad, every material, the pack and slot prefabs and the scene, and adds the scene to the
+build settings. It needs
 `Card.prefab`, `CardQuad.asset` and the `Card_*` materials, so run **Build Demo Scene** first
 in a fresh clone.
 
@@ -314,6 +319,51 @@ from falling apart:
 - **The pack samples mip 0 outright** instead of the card's `SAMPLE_TEXTURE2D_GRAD`. It is
   only ever magnified, and with a quad every two pixels most rasterizer quads straddle a
   triangle edge, so any pixel that guessed a coarser mip would pull in the sheet's gutters.
+
+### How the cut is lit
+
+Three things light the seam, and only the first is on the wrapper itself.
+
+- **`PackCutLight` in `CardPackInput.hlsl`** is the light coming through the seam. Its band is
+  stepped on whole texture pixels, like the torn lip beside it, because a smooth falloff over
+  pixel art reads as a glow pasted on top rather than as light coming through. It is gated by
+  the same peel shape the tear is, so the seam only lights where the sweep has been, and it is
+  added *after* the back-face shade — a cut goes through the foil, so the far side of a
+  tumbling strip keeps its rim.
+- **`PackFlash.shader`** draws the bar and the dim, two materials off one shader with a uniform
+  branch on `_Mode` and blend state as a material property (`PackFlare.mat` adds, `PackDim.mat`
+  multiplies). The bar is on `PackFlare.asset`, a quad four pack widths across whose **UVs are
+  in pack space** — u is 0 and 1 on the wrapper's own edges and carries on past them, which is
+  what lets the shader be handed the sweep in the same 0..1 the tear is measured in, and lets
+  the flash spill past the pack without anything resizing. It draws `ZTest Always`.
+- **The dim is geometry, not a post effect.** It is a frame-filling quad parked `dimDepth`
+  behind the pack and refitted to the frustum every frame, multiplied over what is already
+  drawn with an ordinary depth test. Everything further from the camera — table, piles, album
+  — darkens; the wrapper occludes it and stays lit. That is also why it hangs off the pack's
+  root rather than under `Visual`: the wrapper's lean must not carry the frame with it.
+
+`_Flutter` is the ripple on the strip once it is off. It is driven off `uv.x` and the shared
+hinge ramp rather than anything per column, for the same reason the peel is — neighbouring
+columns have to agree on their shared edge, or the wave shears the strip into stripes. The
+strip flies in **world space**: `CardPackView.DetachLid` reparents it out of the hierarchy,
+because the body drops away underneath it and the rig they both ride pulls back to the table,
+and a piece thrown clear must not be dragged along by either. `Gone` is therefore about the
+pack being out of the way, not about the object being finished — the strip is still in the
+air, and needs an `Update` to fly it.
+
+**The throw is sideways on purpose.** A sealed pack fills the frame top to bottom, so there
+is barely 0.2 units of headroom above it and about four times as much room to cross — thrown
+straight up, the strip is out of shot in an eighth of a second and nobody sees the cut edge
+at all. `lidLaunch` arcs it across the upper corner instead, peaking just under the top of
+the frame and leaving through the side after roughly a second, which overlaps the wrapper's
+own slide. `CardPackView.LidOffScreen` therefore tests all four edges at the strip's own
+depth, not just the top.
+
+Both cut edges are lit, and on **separate clocks**: `bodyGlow` holds while the opened wrapper
+is standing there and only goes out as it drops, `lidGlow` lasts the strip's whole flight,
+which outlives the pack. The hot spot at the sweep's head is switched off the moment the seam
+gives (`LiveHead`) — there is no point being cut any more, so the whole edge lights evenly
+rather than keeping a bright mark wherever the drag happened to finish.
 
 `CardPacks.png` is one sheet of 9 x 20 wrappers, 84x154 px each. It is never sliced into
 sprites: `CardPackSheet` hands the shader a UV rect and one material draws all 180 of them.
